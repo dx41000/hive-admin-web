@@ -151,7 +151,7 @@ Resources:
   ECSTaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub service-core-ecs-task-${EnvironmentName}
+      GroupName: !Sub hive-web-ecs-task-${EnvironmentName}
       GroupDescription: Allow traffic from ALB only
       VpcId: !Ref VpcId
       SecurityGroupIngress:
