@@ -83,7 +83,7 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${InfraStack}-${EnvironmentName}-TaskExecutionRoleARN"
       ContainerDefinitions:
-        - Name: service-core
+        - Name: hive-web
           Image: !Ref ECRImageUri
           Essential: true
           LogConfiguration:
