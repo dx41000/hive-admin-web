@@ -61,7 +61,9 @@ Resources:
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      LoadBalancerArn: !ImportValue !Sub ${InfraStack}-${EnvironmentName}-LoadBalancerARN
+      LoadBalancerArn: 
+        !ImportValue 
+          !Sub ${InfraStack}-${EnvironmentName}-LoadBalancerARN
       Port: 49160
       Protocol: HTTP
       DefaultActions:
@@ -107,7 +109,9 @@ Resources:
     Type: AWS::ECS::Service
     DependsOn: Listener
     Properties:
-      Cluster: !ImportValue !Sub ${InfraStack}-${EnvironmentName}-ECSCluster
+      Cluster: 
+        !ImportValue 
+          !Sub ${InfraStack}-${EnvironmentName}-ECSCluster
       LaunchType: FARGATE
       DesiredCount: 1
       ServiceName: !Sub hive-web-${EnvironmentName}
