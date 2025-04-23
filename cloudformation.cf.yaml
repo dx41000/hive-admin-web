@@ -62,8 +62,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       LoadBalancerArn: 
-        !ImportValue 
-          !Sub ${InfraStack}-${EnvironmentName}-LoadBalancerARN
+        Fn::ImportValue:
+          Fn::Sub: "${InfraStack}-${EnvironmentName}-LoadBalancerARN"
       Port: 49160
       Protocol: HTTP
       DefaultActions:
@@ -79,7 +79,9 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ExecutionRoleArn:
+        Fn::ImportValue:
+          Fn::Sub: "${InfraStack}-${EnvironmentName}-TaskExecutionRoleARN"
       ContainerDefinitions:
         - Name: service-core
           Image: !Ref ECRImageUri
@@ -110,8 +112,8 @@ Resources:
     DependsOn: Listener
     Properties:
       Cluster: 
-        !ImportValue 
-          !Sub ${InfraStack}-${EnvironmentName}-ECSCluster
+        Fn::ImportValue:
+          Fn::Sub: "${InfraStack}-${EnvironmentName}-ECSCluster"
       LaunchType: FARGATE
       DesiredCount: 1
       ServiceName: !Sub hive-web-${EnvironmentName}
