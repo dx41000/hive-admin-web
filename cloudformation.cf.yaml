@@ -94,8 +94,8 @@ Resources:
               awslogs-stream-prefix: ecs
               awslogs-group: !Sub ecs-hive-web-${EnvironmentName}
           PortMappings:
-            - ContainerPort: 80
-              HostPort: 80
+            - ContainerPort: 8080
+              HostPort: 8080
               Protocol: tcp
           Environment:
             - Name: ASPNETCORE_ENVIRONMENT
@@ -125,7 +125,7 @@ Resources:
             - !Ref ECSTaskSecurityGroup
       LoadBalancers:
         - ContainerName: !Sub hive-web
-          ContainerPort: 80
+          ContainerPort: 8080
           TargetGroupArn: !Ref TargetGroup
       TaskDefinition: !Ref TaskDefinition
       DeploymentController:
