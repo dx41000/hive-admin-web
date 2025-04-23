@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Fargate + Load Balancer running a .NET Web API container from ECR
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID for deployment
+    Default: "vpc-0762bfea42ac35503"
+  SubnetIds:
+    Type: CommaDelimitedList
+    Description: List of public subnet IDs
+    Default: "subnet-0aa1a709079c0d2ef,subnet-006f1f9414204e130,subnet-09c85c490603a1ee6"
+  ECRImageUri:
+    Type: String
+    Description: ECR Image URI (e.g., 1234567890.dkr.ecr.us-east-1.amazonaws.com/myapp:latest)
+    Default: "891377085221.dkr.ecr.eu-west-2.amazonaws.com/hive-web:latest"
+  EnvironmentName:
+    Type: String
+    Description: The deployment envrionment
+    Default: production
+  InfraStack:
+    Type: String
+    Description: The stack used for the Infra
+    Default: hive-core
+
+Resources:
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub web-tg1-${EnvironmentName}
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VpcId
+      TargetType: ip
+      HealthCheckPath: /api/healthcheck
+      HealthCheckIntervalSeconds: 90
+      HealthCheckTimeoutSeconds: 20
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-299
+
+  TargetGroup2:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "web-tg2-${EnvironmentName}"
+      Port: 8081
+      Protocol: HTTP
+      VpcId: !Ref VpcId  # Assuming this parameter or resource is defined elsewhere
+      TargetType: ip
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /api/healthcheck
+      HealthCheckIntervalSeconds: 90
+      HealthCheckTimeoutSeconds: 20
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-299
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !ImportValue !Sub ${InfraStack}-${EnvironmentName}-LoadBalancerARN
+      Port: 49160
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub hive-web-${EnvironmentName}
+      Cpu: "256"
+      Memory: "1024"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: service-core
+          Image: !Ref ECRImageUri
+          Essential: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: "true"
+              awslogs-region: eu-west-2
+              awslogs-stream-prefix: ecs
+              awslogs-group: !Sub ecs-hive-web-${EnvironmentName}
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: tcp
+          Environment:
+            - Name: ASPNETCORE_ENVIRONMENT
+              Value: !Sub "${EnvironmentName}"
+            - Name: ASPNETCORE_URLS
+              Value: http://+:8080
+          Ulimits:
+            - Name: nofile
+              SoftLimit: 1048576
+              HardLimit: 1048576
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: Listener
+    Properties:
+      Cluster: !ImportValue !Sub ${InfraStack}-${EnvironmentName}-ECSCluster
+      LaunchType: FARGATE
+      DesiredCount: 1
+      ServiceName: !Sub hive-web-${EnvironmentName}
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups:
+            - !Ref ECSTaskSecurityGroup
+      LoadBalancers:
+        - ContainerName: !Sub hive-web
+          ContainerPort: 80
+          TargetGroupArn: !Ref TargetGroup
+      TaskDefinition: !Ref TaskDefinition
+      DeploymentController:
+        Type: CODE_DEPLOY
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub hive-web-alb-${EnvironmentName}
+      GroupDescription: Allow HTTP in and all traffic out
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 49160
+          ToPort: 49160
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
+
+  ECSTaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub service-core-ecs-task-${EnvironmentName}
+      GroupDescription: Allow traffic from ALB only
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
