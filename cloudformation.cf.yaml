@@ -32,7 +32,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VpcId
       TargetType: ip
-      HealthCheckPath: /api/healthcheck
+      HealthCheckPath: /
       HealthCheckIntervalSeconds: 90
       HealthCheckTimeoutSeconds: 20
       HealthyThresholdCount: 2
