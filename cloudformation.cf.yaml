@@ -28,7 +28,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Sub web-tg1-${EnvironmentName}
-      Port: 80
+      Port: 8080
       Protocol: HTTP
       VpcId: !Ref VpcId
       TargetType: ip
@@ -94,7 +94,7 @@ Resources:
               awslogs-stream-prefix: ecs
               awslogs-group: !Sub ecs-hive-web-${EnvironmentName}
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: 8080
               HostPort: 8080
               Protocol: tcp
           Environment:
@@ -125,7 +125,7 @@ Resources:
             - !Ref ECSTaskSecurityGroup
       LoadBalancers:
         - ContainerName: !Sub hive-web
-          ContainerPort: 80
+          ContainerPort: 8080
           TargetGroupArn: !Ref TargetGroup
       TaskDefinition: !Ref TaskDefinition
       DeploymentController:
@@ -155,9 +155,9 @@ Resources:
       GroupDescription: Allow traffic from ALB only
       VpcId: !Ref VpcId
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 0
           SourceSecurityGroupId: !Ref ALBSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: -1
