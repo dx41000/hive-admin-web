@@ -1,0 +1,47 @@
+{
+    "executionRoleArn": "arn:aws:iam::316012724780:role/ecs-hive-development-execution-role",
+    "containerDefinitions": [
+        {
+            "name": "hive-web",
+            "image": "<IMAGE1_NAME>",
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                  "awslogs-create-group": "true",
+                  "awslogs-region": "eu-west-2",
+                  "awslogs-stream-prefix": "ecs",
+                  "awslogs-group": "ecs-hive-web-development"
+                }
+              },            
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ],
+            "environment":  [
+                {
+                  "name": "ASPNETCORE_ENVIRONMENT",
+                  "value": "development"
+                }
+              ]
+        }
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "1024",
+    "family": "hive-web-development",
+    "ulimits": [
+      {
+          "name": "nofile",
+          "softLimit": 1048576,
+          "hardLimit": 1048576
+      }
+  ]
+  
+}

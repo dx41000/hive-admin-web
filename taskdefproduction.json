@@ -1,0 +1,50 @@
+{
+  "executionRoleArn": "arn:aws:iam::891377085221:role/service-core-ecs-task-production",
+  "containerDefinitions": [
+      {
+          "name": "hive-web",
+          "image": "<IMAGE1_NAME>",
+          "essential": true,
+          "logConfiguration": {
+              "logDriver": "awslogs",
+              "options": {
+                "awslogs-create-group": "true",
+                "awslogs-region": "eu-west-2",
+                "awslogs-stream-prefix": "ecs",
+                "awslogs-group": "ecs-hive-web-production"
+              }
+            },            
+          "portMappings": [
+              {
+                  "hostPort": 80,
+                  "protocol": "tcp",
+                  "containerPort": 80
+              }
+          ],
+          "environment":  [
+              {
+                "name": "ASPNETCORE_ENVIRONMENT",
+                "value": "production"
+              },
+              {
+                "name": "ASPNETCORE_URLS",
+                "value": "http://+:80"
+              }
+            ]
+      }
+  ],
+  "requiresCompatibilities": [
+      "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "1024",
+  "family": "hive-web-production",
+  "ulimits": [
+    {
+        "name": "nofile",
+        "softLimit": 1048576,
+        "hardLimit": 1048576
+    }
+]
+}
