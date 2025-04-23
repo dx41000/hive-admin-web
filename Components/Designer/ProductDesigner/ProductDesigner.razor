@@ -1,0 +1,510 @@
+@page "/designer"
+@using hive_admin_web.Models
+@using hive_admin_web.Models.Designer
+@using hive_admin_web.Models.Enum
+@using hive_admin_web.Models.PrintReady
+@using hive_admin_web.Services
+@using hive.core.models.PrintReady
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@inject IJSRuntime JsRuntime
+<MudPaper>
+  <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+  </MudOverlay>
+  <MudGrid>
+    <MudItem xs="12" sm="9">
+      <MudPaper Class="pa-4">
+        <div id="fpd-target"
+             class="fpd-container fpd-topbar fpd-tabs fpd-tabs-side fpd-top-actions-centered fpd-bottom-actions-centered fpd-views-inside-left">
+        </div>
+      </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="3">
+      <MudPaper Class="pa-4">
+        <MudForm @ref="form" @bind-IsValid="@_success" @bind-Errors="@_errors">
+          <MudNumericField @bind-Value="Width" Disabled="@(Width==null)" Label="Width"/>
+          <MudNumericField @bind-Value="MaxFontSize" Disabled="@(MaxFontSize==null)" Label="Max Font Size"/>
+          <MudNumericField @bind-Value="MinFontSize" Disabled="@(MinFontSize==null)" Label="Min Font Size"/>
+          <MudNumericField @bind-Value="WidthFontSize" Disabled="@(WidthFontSize==null)" Label="Width Font Size"/>
+          <MudNumericField @bind-Value="MaxLength" Disabled="@(MaxLength==null)" Label="Max Length" />
+          <MudSwitch @bind-Value="ZChangeable" Disabled="@(ZChangeable==null)" Label="ZChangeable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Copyable" Disabled="@(Copyable==null)" Label="Copyable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Draggable" Disabled="@(Draggable==null)" Label="Draggable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Rotatable" Disabled="@(Rotatable==null)" Label="Rotatable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Removable" Disabled="@(Removable==null)" Label="Removable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Resizable" Disabled="@(Resizable==null)" Label="Resizable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Editable" Disabled="@(Editable==null)" Label="Editable" Color="Color.Primary" />
+          <MudSwitch @bind-Value="ExcludeFromExport" Disabled="@(ExcludeFromExport==null)" Label="ExcludeFromExport" Color="Color.Primary" />
+          <MudSwitch @bind-Value="Locked" Disabled="@(Locked==null)" Label="Locked" Color="Color.Primary" />
+          <MudButton OnClick="TestPrintFile"  Color="Color.Primary">Test Printfile</MudButton>
+        </MudForm>
+      </MudPaper>
+    </MudItem>
+  </MudGrid>
+</MudPaper>
+
+@code {
+  private DotNetObjectReference<ProductDesigner>? _dotNetObjectRef;
+  
+  private bool overlayVisible;
+  
+  private long? _id;
+  private int? _maxFontSize;
+  private int? _minFontSize;
+  private int? _widthFontSize;
+  private double? _width;
+  private int? _maxLength;
+  private bool? _zChangeable;
+  private bool? _copyable;
+  private bool? _rotatable;
+  private bool? _draggable;
+  private bool? _removable;
+  private bool? _resizable;
+  private bool? _editable;
+  private bool? _excludeFromExport;
+  private bool? _locked;
+
+  private bool UpdateElement = false;
+  
+  string designerTemplae = @"[
+  {
+    ""category"": ""Product Category One"",
+    ""products"": [
+      **product**
+    ]
+  }
+]";
+
+  string productTemplate = @"
+            [
+                {
+                    ""title"": ""Front"",
+                    ""thumbnail"": ""images/shirt_turq/front_turquoise.png"",
+                    ""options"": {
+                        ""stageWidth"": ""**stageWidth**"",
+                        ""stageHeight"": ""**stageHeight**"",
+                        ""usePrintingBoxAsBounding"":true,
+                        ""printingBox"": {
+                                            ""height"":**printBoxHeight**,
+                                            ""width"":**printBoxWidth**,
+                                            ""top"":**printBoxTop**,
+                                            ""left"":**printBoxLeft**,
+                                            ""visibility"": true
+                                            }
+                    },
+                    ""elements"": [
+                       
+                    ]
+                }
+            ]
+        ";
+  
+  public long? Id
+  {
+    get => _id;
+    set
+    {
+      _id = value;
+    }
+  }
+  
+  public double? Width
+  {
+    get => _width;
+    set
+    {
+      _width = value;
+      _ = SetElementParameters();
+    }
+  }
+  
+  public int? MaxFontSize
+  {
+    get => _maxFontSize;
+    set
+    {
+      _maxFontSize = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public int? MinFontSize
+  {
+    get => _minFontSize;
+    set
+    {
+      _minFontSize = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public int? WidthFontSize
+  {
+    get => _widthFontSize;
+    set
+    {
+      _widthFontSize = value; 
+      _ = SetElementParameters();
+      
+    }
+  }
+
+  public int? MaxLength
+  {
+    get => _maxLength;
+    set
+    {
+      _maxLength = value; 
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? ZChangeable
+  {
+    get => _zChangeable;
+    set
+    {
+      _zChangeable = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? Copyable
+  {
+    get => _copyable;
+    set
+    {
+      _copyable = value;
+      _ = SetElementParameters();
+      
+    }
+  }
+
+  public bool? Rotatable
+  {
+    get => _rotatable;
+    set
+    {
+      _rotatable = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? Draggable
+  {
+    get => _draggable;
+    set
+    {
+      _draggable = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? Removable
+  {
+    get => _removable;
+    set
+    {
+      _removable = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? Resizable
+  {
+    get => _resizable;
+    set
+    {
+      _resizable = value; 
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? Editable
+  {
+    get => _editable;
+    set
+    {
+      _editable = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? ExcludeFromExport
+  {
+    get => _excludeFromExport;
+    set
+    {
+      _excludeFromExport = value;
+      _ = SetElementParameters();
+    }
+  }
+
+  public bool? Locked
+  {
+    get => _locked;
+    set
+    {
+      _locked = value;
+      _ = SetElementParameters();
+    }
+  }
+  
+  bool _success;
+  string[] _errors = { };
+  MudForm form;
+  [Parameter] public ProductVariantView ProductVariantView { get; set; }
+
+  protected override void OnInitialized()
+  {
+    // Create a DotNetObjectReference to pass to JS
+    _dotNetObjectRef = DotNetObjectReference.Create(this);
+  }
+  
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      string designFile;
+      if (!string.IsNullOrWhiteSpace(ProductVariantView?.DesignerJson))
+      {
+        designFile = ProductVariantView.DesignerJson;
+      }
+      else
+      {
+        var printBoxHeight = ProductVariantView?.AssetVariantView?.PrintBoxHeight;
+        var printBoxTop = ProductVariantView?.AssetVariantView?.PrintBoxTop;
+        var printBoxLeft = ProductVariantView?.AssetVariantView?.PrintBoxLeft;
+        var printBoxWidth = ProductVariantView?.AssetVariantView?.PrintBoxWidth;
+        var baseArtworkTop = ProductVariantView?.AssetVariantView?.BaseArtworkTop;
+        var baseArtworkLeft = ProductVariantView?.AssetVariantView?.BaseArtworkLeft;
+        var outputWidth = ProductVariantView?.AssetVariantView?.OutputWidth;
+        var outputHeight = ProductVariantView?.AssetVariantView?.OutputHeight;
+        var canvasWidth = ProductVariantView?.AssetVariantView?.CanvasWidth;
+        
+        var aspect = Helper.ScaleRectangles(
+          (int)outputWidth,
+          (int)outputHeight,
+          (int)baseArtworkTop,
+          (int)baseArtworkLeft,
+          (int)printBoxWidth,
+          (int)printBoxHeight,
+          (int)printBoxTop,
+          (int)printBoxLeft,
+          (int)canvasWidth);
+
+        designFile =
+          designerTemplae.Replace("**product**",
+            productTemplate
+              .Replace("**stageWidth**", ProductVariantView?.AssetVariantView?.CanvasWidth.ToString())
+              .Replace("**stageHeight**", ProductVariantView?.AssetVariantView?.CanvasHeight.ToString())
+              .Replace("**printBoxHeight**", aspect.newHeightPrintBox.ToString())
+              .Replace("**printBoxWidth**", aspect.newWidthPrintBox.ToString())
+              .Replace("**printBoxTop**", aspect.newTopPrintBox.ToString())
+              .Replace("**printBoxLeft**", aspect.newLeftPrintBox.ToString())
+          );
+      }
+
+      await InitializeDesigner("fpd-target", designFile);
+      await SetupOnElementSelect("#fpd-target");
+      await SetupOnElementRemove("#fpd-target");
+    }
+
+    await base.OnAfterRenderAsync(firstRender);
+  }
+  
+  private async Task SetElementParameters()
+  {
+    if (UpdateElement)
+    {
+      var json = JsonConvert.SerializeObject(new GeneralProperties
+      {
+        MaxFontSize = MaxFontSize ?? 0,
+        MinFontSize = MinFontSize ?? 0,
+        WidthFontSize = WidthFontSize ?? 0,
+        MaxLength = MaxLength ?? 0,
+        ZChangeable = ZChangeable ?? false,
+        Copyable = Copyable ?? false,
+        Rotatable = Rotatable ?? false,
+        Draggable = Draggable ?? false,
+        Removable = Removable ?? false,
+        Resizable = Resizable ?? false,
+        Editable = Editable ?? false,
+        ExcludeFromExport = ExcludeFromExport ?? false,
+        Locked = Locked ?? false,
+        Width = Width ?? 0
+      });
+      await JsRuntime.InvokeVoidAsync("callSetElementParameters", _dotNetObjectRef, Id, json);
+      //await GetProduct();
+      //DisableProperties();
+    }
+  }
+
+  private void DisableProperties()
+  {
+    UpdateElement = false;
+    MaxFontSize = null;
+    MinFontSize = null;
+    WidthFontSize = null;
+    MaxLength = null;
+    ZChangeable = null;
+    Copyable = null;
+    Rotatable = null;
+    Draggable = null;
+    Removable = null;
+    Resizable = null;
+    Editable = null;
+    ExcludeFromExport = null;
+    Locked = null;
+    Width = null;
+    StateHasChanged();
+    UpdateElement = true;
+  }
+
+  public async Task InitializeDesigner(string elementId, string json)
+  {
+    await JsRuntime.InvokeVoidAsync("initializeFPD", elementId, json);
+  }
+
+  public async Task AddCustomImage()
+  {
+    await JsRuntime.InvokeVoidAsync("addCustomImage", "http://localhost:5266/fpd/images/front.png", "Some Image", new object(), 1);
+  }
+
+  public async Task SetupOnElementSelect(string elementId)
+  {
+    await JsRuntime.InvokeVoidAsync("callOnElementSelect", _dotNetObjectRef, elementId);
+  }
+  
+  public async Task SetupOnElementRemove(string elementId)
+  {
+    await JsRuntime.InvokeVoidAsync("callOnElementRemove", _dotNetObjectRef, elementId);
+  }
+
+  [JSInvokable("OnElementSelect")]
+  public async Task OnElementSelect(string json)
+  {
+    var jsonObject = JObject.Parse(json);
+
+    var type = jsonObject["type"]?.ToString();
+
+    if (type == "image")
+    {
+      var element = JsonConvert.DeserializeObject<DesignerElementImage>(json);
+      UpdateElement = false;
+      SetParams(element);
+      UpdateElement = true;
+    }
+    else if (type == "i-text")
+    {
+      var element = JsonConvert.DeserializeObject<DesignerElementText>(json);
+      UpdateElement = false;
+      SetParams(element);
+      UpdateElement = true;
+    }
+  }
+
+  [JSInvokable("OnElementUnSelect")]
+  public async Task OnElementUnSelect()
+  {
+    UpdateElement = false;
+    DisableProperties();
+    UpdateElement = true;
+  }
+
+  private void SetParams(DesignerElementImage designerElementImage)
+  {
+    Id = designerElementImage.Id;
+    Copyable = designerElementImage.Copyable;
+    Rotatable = designerElementImage.Rotatable;
+    Draggable = designerElementImage.Draggable;
+    Removable = designerElementImage.Removable;
+    Resizable = designerElementImage.Resizable;
+    Editable = null;
+    ExcludeFromExport = designerElementImage.ExcludeFromExport;
+    Locked = designerElementImage.Locked;
+    Width = designerElementImage.Width;
+    ZChangeable = designerElementImage.ZChangeable;
+    StateHasChanged();
+  }
+
+  private void SetParams(DesignerElementText designerElementText)
+  {
+    Id = designerElementText.Id;
+    Copyable = designerElementText.Copyable;
+    Rotatable = designerElementText.Rotatable;
+    Draggable = designerElementText.Draggable;
+    Removable = designerElementText.Removable;
+    Resizable = designerElementText.Resizable;
+    Editable = designerElementText.Editable;
+    ExcludeFromExport = designerElementText.ExcludeFromExport;
+    Locked = designerElementText.Locked;
+    WidthFontSize = designerElementText.WidthFontSize;
+    MaxFontSize = designerElementText.MaxFontSize;
+    MaxLength = designerElementText.MaxLength;
+    MinFontSize = designerElementText.MinFontSize;
+    Width = designerElementText.Width;
+    ZChangeable = designerElementText.ZChangeable;
+    StateHasChanged();
+  }
+
+  public async Task GetProduct()
+  {
+    var product = await JsRuntime.InvokeAsync<string>("getProduct");
+    var printOrder = await GetPrintOrder();
+    designerTemplae = designerTemplae.Replace("**product**", product);
+    ProductVariantView.DesignerJson = designerTemplae;
+    ProductVariantView.PrintOrder = printOrder;
+  }
+
+  private async Task<string> GetPrintOrder()
+  {
+    return await JsRuntime.InvokeAsync<string>("getPrintOrderData");
+  }
+
+  [JSInvokable("OnElementRemove")]
+  public async Task OnElementRemove()
+  {
+    DisableProperties();
+  }
+
+  private async Task TestPrintFile()
+  {
+    overlayVisible = true;
+    
+    var service = new ProductariantViewService();
+    var response = await service.GetPrintFile(new GenerateImageRequest
+    {
+      ProductVariantDraftId = (long)ProductVariantView.ProductVariantId,
+      ProductType = (int)ProductType.POD,
+      GenerateImages = new List<GenerateImage>
+      {
+        new()
+        {
+          ProductVariantViewDraftId = (long)ProductVariantView.Id
+        }
+      }
+    });
+    
+    var json = response.Data.Payload.ToString();
+    var generateImageResponse = JsonConvert.DeserializeObject<GenerateImageResponse>(json);
+    
+    if (generateImageResponse?.PrintFile != null)
+    {
+      // Convert the response byte[] to a file download
+      var fileBytes = generateImageResponse.PrintFile; // Assuming the response has a byte[] called FileBytes
+      var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".pdf"; // Change the file extension/type as per your requirement
+        
+      // Trigger the download using JS interop
+      await JSRuntimeExtensions.InvokeVoidAsync(JsRuntime, "downloadFile", fileName, fileBytes);
+      
+      overlayVisible = false;
+      StateHasChanged();
+    }
+
+  }
+
+
+
+}

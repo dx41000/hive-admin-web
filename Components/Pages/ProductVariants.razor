@@ -1,0 +1,153 @@
+﻿@page "/ProductVariants/{productDraftId}"
+@using hive_admin_web.Models
+@using hive_admin_web.Models.Enum
+@using hive_admin_web.Models.PrintReady
+@using hive_admin_web.Services
+@using Newtonsoft.Json
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Product Variants</PageTitle>
+
+<MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
+  <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Product Variants</MudText>
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Product Variants</MudText>
+    <MudSpacer />
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+        Variant 1
+    </MudTh>
+    <MudTh>
+        Variant 2
+    </MudTh>
+    <MudTh>
+      Variant 3
+    </MudTh>
+    <MudTh>
+      Test
+    </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.AssetVariant.Option1Type - @context.AssetVariant.Option1</a></MudTd>
+    <MudTd>@context.AssetVariant.Option2Type - @context.AssetVariant.Option2</MudTd>
+    <MudTd>@context.AssetVariant.Option3Type - @context.AssetVariant.Option3</MudTd>
+    <MudTd>
+      @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD)
+      {
+        <MudButton @onclick="() => TestPrintFile(context)" Variant="Variant.Filled" Color="Color.Primary">Test</MudButton>
+      }
+    </MudTd>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+TestPrintFile
+<MudButton @onclick="Back" Variant="Variant.Filled" Color="Color.Primary">
+  Back
+</MudButton>
+
+@* <MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary"> *@
+@*   Open Simple Dialog *@
+@* </MudButton> *@
+@code {
+
+  [Parameter] public string productDraftId { get; set; }
+
+  private bool _isLoading;
+  private string _searchString = "";
+  private MudTable<ProductVariant> table;
+  private List<BreadcrumbItem> _items;
+  private bool overlayVisible;
+  
+  protected override async Task OnInitializedAsync()
+  {
+    _items =
+    [
+      new BreadcrumbItem("Products", "products"),
+      new BreadcrumbItem("Product Variants", "productvariants/" + productDraftId)
+    ];
+  }
+
+  private async Task OpenDialogAsync()
+  {
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      MaxWidth = MaxWidth.Small
+    };
+
+    //return DialogService.ShowAsync<CreateProductVariant>("Create ProductVariant", options);
+    // var result = await (await DialogService.ShowAsync<CreateProductVariant>("Create ProductVariant", options)).Result;
+    // var returnedValue = result.Data as string ?? string.Empty;
+    await table.ReloadServerData();
+  }
+
+  private void Back()
+  {
+    NavigationManager.NavigateTo("products");
+  }
+
+
+  private async Task<TableData<ProductVariant>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var service = new ProductVariantService();
+    var response = await service.GetAllProductVariantsAsync(long.Parse(productDraftId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var json = response.Data.Payload.ToString();
+    var pagedData = JsonConvert.DeserializeObject<List<ProductVariant>>(json);
+    _isLoading = false;
+    return new TableData<ProductVariant>() { TotalItems = response.Pagination.Total, Items = pagedData };
+  }
+
+  private void OnSearch(string text)
+  {
+    _searchString = text;
+    table.ReloadServerData();
+  }
+  
+  private async Task TestPrintFile(ProductVariant productVariant)
+  {
+    _isLoading = true;
+    overlayVisible = true;
+    var service = new ProductariantViewService();
+    
+    var response = await service.GetPrintFile(new GenerateImageRequest
+    {
+      ProductVariantDraftId = (long)productVariant.Id,
+      ProductType = (int)productVariant.AssetVariant.Asset.ProductType,
+      GenerateImages = []
+    });
+    
+    var json = response.Data.Payload.ToString();
+    var generateImageResponse = JsonConvert.DeserializeObject<GenerateImageResponse>(json);
+    
+    if (generateImageResponse?.PrintFile != null)
+    {
+      // Convert the response byte[] to a file download
+      var fileBytes = generateImageResponse.PrintFile; // Assuming the response has a byte[] called FileBytes
+      var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".pdf"; // Change the file extension/type as per your requirement
+        
+      // Trigger the download using JS interop
+      await JSRuntimeExtensions.InvokeVoidAsync(JSRuntime, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+    }
+    overlayVisible = false;
+    _isLoading = false;
+  }
+}

@@ -1,0 +1,40 @@
+@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+@using hive_admin_web.Components.Designer.PrintFileDesigner
+@using hive_admin_web.Models
+@using Newtonsoft.Json
+
+
+<MudDialog>
+  <TitleContent>
+    Design View
+  </TitleContent>
+  <DialogContent>
+    <PrintFileDesigner
+      AssetVariantView="AssetVariantView">
+    </PrintFileDesigner>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+
+  [Parameter]
+  public AssetVariantView AssetVariantView { get; set; }
+
+  [CascadingParameter]
+  private MudDialogInstance MudDialog { get; set; }
+  
+  private void Callback()
+  {
+    MudDialog.Close(DialogResult.Ok("ProductCreated"));
+  }
+
+  private void Submit() => MudDialog.Close(DialogResult.Ok(AssetVariantView));
+
+  private void Cancel() => MudDialog.Cancel();
+
+}

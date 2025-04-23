@@ -1,0 +1,46 @@
+@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+@using hive_admin_web.Services
+
+<MudPaper Class="pa-4">
+  <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+    <MudTextField @bind-Value="_product.Name" T="string" Label="Name" Required="true" RequiredError="Name is required!" />
+    <MudTextField @bind-Value="_product.Description" T="string" Label="Description" Required="true" RequiredError="Description is required!"  />
+  </MudForm>
+</MudPaper>
+
+<MudButton OnClick="Create">Create</MudButton>
+
+@code {
+  bool success;
+  string[] errors = { };
+  MudForm form;
+  hive_admin_web.Models.CreateProduct _product;
+
+  [CascadingParameter]
+  private MudDialogInstance MudDialog { get; set; }
+
+  [Parameter]
+  public long? AssetId { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    _product = new Models.CreateProduct();
+  }
+
+  private async Task Create()
+  {
+    _product.ProductId = AssetId;
+    _product.ImageUrl = "SomeUrl";
+
+    var productDraftService = new ProductService();
+    await productDraftService.Wizard(_product, "");
+    MudDialog.Close(DialogResult.Ok("ProductDraftCreated"));
+  }
+
+  private void Callback()
+  {
+    MudDialog.Close(DialogResult.Ok("ProductDraftCreated"));
+  }
+
+}

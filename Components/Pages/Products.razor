@@ -1,0 +1,97 @@
+﻿@page "/Products"
+@using hive_admin_web.Models
+@using hive_admin_web.Services
+@using Newtonsoft.Json
+@using CreateProduct = hive_admin_web.Components.Dialog.CreateAsset
+@inject IDialogService DialogService
+
+<PageTitle>Products</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Products</MudText>
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+
+
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="_table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Products</MudText>
+    <MudSpacer />
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Name" T="Product">
+        Name
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+        HsCode
+    </MudTh>
+    <MudTh>
+        Asset Type
+    </MudTh>
+    <MudTh>
+
+    </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd><a href="Productvariants/@context.Id">@context.Name</a></MudTd>
+    <MudTd>@context.Asset.HsCode</MudTd>
+    <MudTd>@(context.Asset.ProductType == 1 ? "Pod" : "All Over")</MudTd>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+
+@* *@
+@* <MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary"> *@
+@*   Add Product *@
+@* </MudButton> *@
+@code {
+
+  private bool _isLoading;
+  private string _searchString = "";
+  private MudTable<Product> _table;
+
+  private List<BreadcrumbItem> _items =
+  [
+    new("Products", href: "products")
+  ];
+
+  private async Task OpenDialogAsync()
+  {
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      MaxWidth = MaxWidth.Small
+    };
+
+    //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
+    var result = await (await DialogService.ShowAsync<CreateProduct>("Create Product", options)).Result;
+    await _table.ReloadServerData();
+  }
+
+  private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var service = new ProductService();
+    var response = await service.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var json = response.Data.Payload.ToString();
+    var pagedData = JsonConvert.DeserializeObject<List<Product>>(json);
+    _isLoading = false;
+    return new TableData<Product>() { TotalItems = response.Pagination.Total, Items = pagedData };
+  }
+
+  private void OnSearch(string text)
+  {
+    _searchString = text;
+    _table.ReloadServerData();
+  }
+
+}

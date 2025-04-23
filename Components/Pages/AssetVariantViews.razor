@@ -1,0 +1,207 @@
+﻿@page "/AssetVariantViews/{productId}/{productVariantId}"
+@using hive_admin_web.Components.Dialog
+@using hive_admin_web.Models
+@using hive_admin_web.Models.Enum
+@using hive_admin_web.Services
+@using Newtonsoft.Json
+@using SkiaSharp
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Asset Variant Views</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Asset Variant Views</MudText>
+
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Asset Variants Views</MudText>
+    <MudSpacer />
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Name" T="AssetVariantView">
+        Name
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>Output Width</MudTh>
+    <MudTh>Output Height</MudTh>
+    <MudTh>Preview</MudTh>
+    <MudTh>
+
+    </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd>@context.Name</MudTd>
+    <MudTd>@context.OutputWidth</MudTd>
+    <MudTd>@context.OutputHeight</MudTd>
+    <MudTh>
+      <MudImage Src="@GetImage(context)" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+    </MudTh>
+    <MudTd>
+      @if (context?.AssetVariant?.Asset?.ProductType == (int)ProductType.POD)
+      {
+        <MudButton @onclick="() => OpenDialogAsync(context)" Variant="Variant.Filled" Color="Color.Primary">Design</MudButton>
+      }
+      else
+      {
+        <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
+          <ActivatorContent>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.CloudUpload">
+              Upload
+            </MudButton>
+          </ActivatorContent>
+        </MudFileUpload>
+      }
+    </MudTd>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+
+
+<MudButton @onclick="Back" Variant="Variant.Filled" Color="Color.Primary">
+  Back
+</MudButton>
+
+@code {
+
+  [Parameter] public string productVariantId { get; set; }
+  [Parameter] public string productId { get; set; }
+
+  private bool _isLoading;
+  private string _searchString = "";
+  private MudTable<AssetVariantView> table;
+
+  private List<BreadcrumbItem> _items;
+
+  IList<IBrowserFile> _files = new List<IBrowserFile>();
+
+  string GetImage(AssetVariantView assetVariantView)
+  {
+    if (assetVariantView?.PrintFile != null && assetVariantView?.PrintFile.Length != 0)
+    {
+      var imagesrc= Convert.ToBase64String(assetVariantView.PrintFile);
+      return $"data:image/jpeg;base64,{imagesrc}";
+    }
+    
+    if (assetVariantView?.AssetVariant?.BaseArtwork != null && assetVariantView?.AssetVariant.BaseArtwork.Length != 0)
+    {
+      var imagesrc= Convert.ToBase64String(assetVariantView.AssetVariant.BaseArtwork);
+      return $"data:image/jpeg;base64,{imagesrc}";
+    }
+
+    return "";
+  }
+
+  private async Task<byte[]> StreamToByteArray(Stream stream)
+  {
+    using (MemoryStream ms = new MemoryStream())
+    {
+      await stream.CopyToAsync(ms); // Use the async method
+      return ms.ToArray();
+    }
+  }
+
+  protected override async Task OnInitializedAsync()
+  {
+    _items =
+    [
+      new BreadcrumbItem("Assets", "assets"),
+      new BreadcrumbItem("Asset Variants", "assetvariants/" + productId),
+      new BreadcrumbItem("Asset Variant Views", "AssetVariantViews/" + productId + "/" + productVariantId)
+    ];
+  }
+
+  private async Task OpenDialogAsync(AssetVariantView assetVariantView)
+  {
+    
+    var service = new AssetVariantViewService();
+
+    var response = await service.GetAssetVariantViewByIdAsync((long)assetVariantView.Id);
+    var json = response.Data.Payload.ToString();
+    assetVariantView = JsonConvert.DeserializeObject<AssetVariantView>(json);
+    
+    var parameters = new DialogParameters<CreateProductVariantView>()
+    {
+      { x => x.AssetVariantView, assetVariantView }
+    };
+
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      FullScreen = true,
+      MaxWidth = MaxWidth.ExtraExtraLarge
+    };
+
+    //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
+    var result = await (await DialogService.ShowAsync<CreateProductVariantView>("Create Product View Variant", parameters, options)).Result;
+    var returnedValue = result?.Data as AssetVariantView ?? null;
+    if (returnedValue != null)
+    {
+      await SaveView(assetVariantView);
+    }
+
+    await table.ReloadServerData();
+  }
+
+  private async Task SaveView(AssetVariantView assetVariantView)
+  {
+    var productVariantViewService = new AssetVariantViewService();
+    await productVariantViewService.UpdateAssetVariantViewAsync(assetVariantView);
+  }
+
+  private void Back()
+  {
+    NavigationManager.NavigateTo("assetvariants/" + productId);
+  }
+
+
+  private async Task<TableData<AssetVariantView>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var service = new AssetVariantViewService();
+    var response = await service.GetAllAssetVariantViewsByIdAsync(long.Parse(productVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var json = response.Data.Payload.ToString();
+    var pagedData = JsonConvert.DeserializeObject<List<AssetVariantView>>(json);
+    _isLoading = false;
+    return new TableData<AssetVariantView>() { TotalItems = response.Pagination.Total, Items = pagedData };
+  }
+
+  private void OnSearch(string text)
+  {
+    _searchString = text;
+    table.ReloadServerData();
+  }
+
+  private async Task UploadFiles(IBrowserFile? file, AssetVariantView assetVariantView )
+  {
+    if (file != null)
+    {
+      _isLoading = true;
+      _files.Add(file);
+      var stream = file.OpenReadStream( 10 * 1024 * 1024);
+      var fileBytes = await StreamToByteArray(stream);
+      assetVariantView.PrintFile = fileBytes;
+      var skImage = SKImage.FromEncodedData(assetVariantView.PrintFile);
+      assetVariantView.OutputHeight = skImage.Height;
+      assetVariantView.OutputWidth = skImage.Width;
+      var service = new AssetVariantViewService();
+      await service.UpdateAssetVariantViewAsync(assetVariantView);
+      await table.ReloadServerData();
+    }
+  }
+
+}

@@ -1,0 +1,188 @@
+﻿@page "/ProductVariantViews/{productDraftId}/{productDraftVariantId}"
+@using hive_admin_web.Components.Dialog
+@using hive_admin_web.Models
+@using hive_admin_web.Models.Enum
+@using hive_admin_web.Models.PrintReady
+@using hive_admin_web.Services
+@using Newtonsoft.Json
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+
+<PageTitle>Product Variant Views</PageTitle>
+
+<MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
+  <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Product Variant Views</MudText>
+
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Product Variants Views</MudText>
+    <MudSpacer />
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Name" T="ProductVariantView">
+        Name
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>Output Width</MudTh>
+    <MudTh>Output Height</MudTh>
+    <MudTh>Preview</MudTh>
+    <MudTh> </MudTh>
+    <MudTh> </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd>@context.Name</MudTd>
+    <MudTd>@context.AssetVariantView.OutputWidth</MudTd>
+    <MudTd>@context.AssetVariantView.OutputHeight</MudTd>
+    <MudTh>
+      <MudImage Src="@GetUrl((long)context.AssetVariantViewId)" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+    </MudTh>
+    <MudTd>
+      @if (context.ProductType == (int)ProductType.POD)
+      {
+        <MudButton @onclick="() => OpenDialogAsync(context)" Variant="Variant.Filled" Color="Color.Primary">Design</MudButton>
+      }
+      else
+      {
+        <MudButton @onclick="() => TestPrintFile(context)" Variant="Variant.Filled" Color="Color.Primary">Test</MudButton>
+      }
+    </MudTd>
+    <MudTd>
+      <MudButton @onclick="() => CopyDesign(context)" Variant="Variant.Filled" Color="Color.Primary">Apply To All Views</MudButton>
+    </MudTd>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+
+
+<MudButton @onclick="Back" Variant="Variant.Filled" Color="Color.Primary">
+  Back
+</MudButton>
+
+@code {
+
+  [Parameter] public string productDraftVariantId { get; set; }
+  [Parameter] public string productDraftId { get; set; }
+
+  private bool _isLoading;
+  private string _searchString = "";
+  private MudTable<ProductVariantView> table;
+  private List<BreadcrumbItem> _items;
+  private bool overlayVisible;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _items =
+    [
+      new BreadcrumbItem("Products", "products"),
+      new BreadcrumbItem("Product Variants", "productVariants/" + productDraftId),
+      new BreadcrumbItem("Product Variant Views", "ProductVariantViews/" + productDraftId + "/" + productDraftVariantId)
+    ];
+  }
+
+  string GetUrl(long id)
+  {
+    return "https://localhost:7026/Image/" + id;
+  }
+
+  private async Task OpenDialogAsync(ProductVariantView productVariantView)
+  {
+    var parameters = new DialogParameters<DesignView>()
+    {
+      { x => x.ProductVariantView, productVariantView }
+    };
+
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      FullScreen = true,
+      MaxWidth = MaxWidth.ExtraExtraLarge
+    };
+
+    //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
+    var result = await (await DialogService.ShowAsync<DesignView>(" View Variant", parameters, options)).Result;
+    var returnedValue = result?.Data as ProductVariantView ?? null;
+    if (returnedValue != null)
+    {
+      await SaveView(productVariantView);
+    }
+  }
+
+  private async Task SaveView(ProductVariantView productVariantView)
+  {
+    var productDraftVariantViewService = new ProductariantViewService();
+    await productDraftVariantViewService.UpdateProductVariantViewAsync(productVariantView);
+  }
+
+  private void Back()
+  {
+    NavigationManager.NavigateTo("productVariants/" + productDraftId);
+  }
+
+
+  private async Task<TableData<ProductVariantView>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var service = new ProductariantViewService();
+    var response = await service.GetAllProductDrafVariantViewsByIdAsync(long.Parse(productDraftVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var json = response.Data.Payload.ToString();
+    var pagedData = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
+    _isLoading = false;
+    return new TableData<ProductVariantView>() { TotalItems = response.Pagination.Total, Items = pagedData };
+  }
+
+  private void OnSearch(string text)
+  {
+    _searchString = text;
+    table.ReloadServerData();
+  }
+
+  private async Task TestPrintFile(ProductVariantView productVariantView)
+  {
+    _isLoading = true;
+    overlayVisible = true;
+    var service = new ProductariantViewService();
+
+    var response = await service.GetPrintFile(new GenerateImageRequest
+    {
+      ProductType = (int)productVariantView.ProductType,
+      ProductVariantDraftId = (long)productVariantView.ProductVariantId,
+      GenerateImages = new List<GenerateImage>()
+      {
+        new GenerateImage()
+        {
+          ProductVariantViewDraftId = (int)productVariantView.Id
+        }
+      }
+    });
+  }
+
+  private async Task CopyDesign(ProductVariantView productVariantView)
+  {
+    _isLoading = true;
+    overlayVisible = true;
+    var service = new ProductariantViewService();
+
+    var response = await service.CopyDesign(productVariantView);
+    
+    overlayVisible = false;
+    _isLoading = false;
+
+  }
+}

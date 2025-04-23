@@ -1,0 +1,307 @@
+﻿@page "/printfiledesigner"
+@using System.Dynamic
+@using System.Text.Json
+@using hive_admin_web.Models
+@using hive_admin_web.Services
+@using Newtonsoft.Json.Linq
+@using SkiaSharp
+@inject IJSRuntime JSRuntime
+
+
+<MudText Typo="Typo.h4" GutterBottom="true">Design View</MudText>
+
+<MudGrid>
+  <MudItem xs="12" md="8">
+    <!-- Left side (80%) -->
+    <MudPaper Class="pa-4">
+      <MudForm>
+        <canvas @ref="_canvasRef" style="border:1px solid #000; margin-top: 20px;"></canvas>
+      </MudForm>
+    </MudPaper>
+  </MudItem>
+
+  <MudItem xs="12" md="4">
+    <!-- Right side (20%) -->
+    <MudPaper Class="pa-4">
+      <MudForm>
+        <MudTextField Label="Canvas X" @bind-Value="BaseArtworkLeft" Variant="Variant.Filled" Type="number" />
+        <MudTextField Label="Canvas Y" @bind-Value="BaseArtworkTop" Variant="Variant.Filled" Type="number" />
+        <MudTextField Label="Canvas Width" @bind-Value="OutputWidth" Variant="Variant.Filled" Type="number" />
+        <MudTextField Label="Canvas Height" @bind-Value="OutputHeight" Variant="Variant.Filled" Type="number" />
+        <MudCheckBox @bind-Value="_sync" Label="Keep Canvas and Print Area in Sync" Color="Color.Primary"></MudCheckBox>
+        <MudTextField Label="PrintBox X" @bind-Value="PrintBoxLeft" Variant="Variant.Filled" Type="number" />
+        <MudTextField Label="PrintBox Y" @bind-Value="PrintBoxTop" Variant="Variant.Filled" Type="number" />
+        <MudTextField Label="PrintBox Width" @bind-Value="PrintBoxWidth" Variant="Variant.Filled" Type="number" />
+        <MudTextField Label="PrintBox Height" @bind-Value="PrintBoxHeight" Variant="Variant.Filled" Type="number" />
+      </MudForm>
+    </MudPaper>
+  </MudItem>
+</MudGrid>
+
+@code {
+
+  [Parameter]
+    public AssetVariantView AssetVariantView { get; set; }
+
+  private Canvas Canvas = new();
+
+  public int BaseArtworkLeft
+  {
+    get => AssetVariantView.BaseArtworkLeft ?? 0;
+    set
+    {
+      AssetVariantView.BaseArtworkLeft = value;
+
+      if (_sync)
+      {
+        AssetVariantView.PrintBoxLeft = value;
+        PrintBoxLeft = value;
+      }
+
+      _ = OnRectangleChanged();
+    }
+  }
+
+
+  public int BaseArtworkTop
+  {
+    get => AssetVariantView.BaseArtworkTop ?? 0;
+    set
+    {
+      AssetVariantView.BaseArtworkTop = value;
+      
+      if (_sync)
+      {
+        AssetVariantView.PrintBoxTop = value;
+        PrintBoxTop = value;
+      }
+      
+      _ = OnRectangleChanged();
+    }
+  }
+
+  public int OutputWidth
+  {
+    get =>  AssetVariantView.OutputWidth ?? 0;
+    set
+    {
+      AssetVariantView.OutputWidth = value;
+
+      if (_sync)
+      {
+        AssetVariantView.PrintBoxWidth = value;
+        PrintBoxWidth = value;
+      }
+
+      _ = OnRectangleChanged();
+    }
+  }
+
+  public int OutputHeight
+  {
+    get =>  AssetVariantView.OutputHeight ?? 0;
+    set
+    {
+      
+      AssetVariantView.OutputHeight = value;
+
+      if (_sync)
+      {
+        AssetVariantView.PrintBoxHeight = value;
+        PrintBoxHeight = value;
+      }
+
+      _ = OnRectangleChanged();
+    }
+  }
+
+
+  public int PrintBoxLeft
+  {
+    get => AssetVariantView.PrintBoxLeft ?? 0;
+    set
+    {
+      AssetVariantView.PrintBoxLeft = value;
+      _ = OnRectangleChanged();
+    }
+  }
+
+
+  public int PrintBoxTop
+  {
+    get => AssetVariantView.PrintBoxTop ?? 0;
+    set
+    {
+      AssetVariantView.PrintBoxTop = value;
+      _ = OnRectangleChanged();
+    }
+  }
+
+  public int PrintBoxWidth
+  {
+    get => AssetVariantView.PrintBoxWidth ?? 0;
+    set
+    {
+      AssetVariantView.PrintBoxWidth = value;
+      _ = OnRectangleChanged();
+    }
+  }
+
+  public int PrintBoxHeight
+  {
+    get => AssetVariantView.PrintBoxHeight ?? 0;
+    set
+    {
+      AssetVariantView.PrintBoxHeight = value;
+      _ = OnRectangleChanged();
+    }
+  }
+
+  private bool _sync = true;
+  private ElementReference _canvasRef;
+  private bool _canvsInitialized = false;
+  IList<IBrowserFile> _files = new List<IBrowserFile>();
+
+  // private async Task UpdateCanvas()
+  // {
+  //   await DrawImageWithRectangle();
+  // }
+
+  private async Task InitializeCanvas()
+  {
+    if (AssetVariantView?.AssetVariant?.BaseArtwork == null)
+    {
+      var imageService = new ImageDownloaderService();
+      AssetVariantView.AssetVariant.BaseArtwork = await imageService.ConvertImageUrlToByteArrayAsync("http://localhost:5266/fpd/images/blank.jpg");
+    }
+
+    await Task.Delay(50);
+    await DrawImageWithRectangle();
+    _canvsInitialized = true;
+  } 
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      await InitializeCanvas();
+    }
+  }
+
+  private async Task DrawImageWithRectangle()
+  {
+    var canvasElement = await JSRuntime.InvokeAsync<Dictionary<string, object>>("canvasHelper.drawImageWithRectangle",
+      _canvasRef,
+      AssetVariantView.AssetVariant.BaseArtwork,
+      AssetVariantView.BaseArtworkLeft,
+      AssetVariantView.BaseArtworkTop,
+      AssetVariantView.OutputWidth,
+      AssetVariantView.OutputHeight,
+      AssetVariantView.PrintBoxLeft,
+      AssetVariantView.PrintBoxTop,
+      AssetVariantView.PrintBoxWidth,
+      AssetVariantView.PrintBoxHeight);
+
+    Canvas = new Canvas
+    {
+      width = double.Parse(canvasElement["width"].ToString()),
+      height = double.Parse(canvasElement["height"].ToString()),
+      scaleX = double.Parse(canvasElement["scaleX"].ToString()),
+      scaleY = double.Parse(canvasElement["scaleY"].ToString())
+    };
+
+    if (AssetVariantView.OutputWidth != null && AssetVariantView.OutputHeight != null)
+    {
+      var aspect = Helper.MaintainAspectRatio(
+        (int)AssetVariantView.OutputWidth,
+        (int)AssetVariantView.OutputHeight,
+        800);
+
+      AssetVariantView.CanvasHeight = aspect.newHeight;
+      AssetVariantView.CanvasWidth = aspect.newWidth;
+      
+      AssetVariantView.ScaleX = await GetscaleX();
+      AssetVariantView.ScaleY = await GetscaleY();
+    }
+    StateHasChanged();
+  }
+
+  private async Task OnRectangleChanged()
+  {
+    if (_canvsInitialized)
+    {
+      await DrawImageWithRectangle();
+    }
+  }
+
+  private async Task SaveImageAtOriginalResolution()
+  {
+    // Save the image at the original resolution (no scaling applied)
+    await JSRuntime.InvokeVoidAsync("canvasHelper.saveImageAtOriginalResolution", _canvasRef, AssetVariantView.AssetVariant.BaseArtwork);
+  }
+
+  private async Task ReturnToScaledState()
+  {
+    // Revert to the scaled state (redraw the image and rectangle at the scaled size)
+    await JSRuntime.InvokeVoidAsync("canvasHelper.returnToScaledState", _canvasRef, AssetVariantView.AssetVariant.BaseArtwork);
+  }
+
+  // private async Task UploadFiles(IBrowserFile? file)
+  // {
+  //   if (file != null)
+  //   {
+  //     _files.Add(file);
+  //     var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+  //     var fileBytes = await StreamToByteArray(stream);
+  //     productVariantView.PrintFile = fileBytes;
+  //     var skImage = SKImage.FromEncodedData(productVariantView.PrintFile);
+  //     productVariantView.OutputHeight = skImage.Height;
+  //     productVariantView.OutputWidth = skImage.Width;
+  //     await ClearCanvasAndDrawImage();
+  //   }
+  // }
+
+  // private async Task<byte[]> StreamToByteArray(Stream stream)
+  // {
+  //   using (MemoryStream ms = new MemoryStream())
+  //   {
+  //     await stream.CopyToAsync(ms); // Use the async method
+  //     return ms.ToArray();
+  //   }
+  // }
+
+  private async Task ClearCanvasAndDrawImage()
+  {
+    // Clear the canvas first
+    await JSRuntime.InvokeVoidAsync("canvasHelper.clearCanvas", _canvasRef);
+    // Now redraw the image with the rectangle
+    await DrawImageWithRectangle();
+  }
+  
+  private async Task<double> GetscaleX()
+  {
+    try
+    {
+      return Canvas.scaleX;
+    }
+    catch (Exception ex)
+    {
+      return 0;
+    }
+  }
+
+  private async Task<double> GetscaleY()
+  {
+    try
+    {
+      return Canvas.scaleY;
+
+    }
+    catch (Exception ex)
+    {
+      return 0;
+    }
+  }
+}
+
+

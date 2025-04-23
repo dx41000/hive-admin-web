@@ -1,0 +1,173 @@
+﻿@page "/AssetVariants/{assetId}"
+@using hive_admin_web.Models
+@using hive_admin_web.Models.Enum
+@using hive_admin_web.Services
+@using Newtonsoft.Json
+@using SkiaSharp
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Asset Variants</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Asset Variants</MudText>
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Asset Variants</MudText>
+    <MudSpacer />
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Option1" T="AssetVariant">
+        Variant 1
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+    <MudTableSortLabel SortLabel="Option2" T="AssetVariant">
+      Variant 2
+    </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Option3" T="AssetVariant">
+        Variant 3
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+      Print File Image
+    </MudTh>
+    <MudTh>
+        Print File
+    </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd><a href="assetVariantViews/@context.AssetId/@context.Id">@context.Option1Type - @context.Option1</a></MudTd>
+    <MudTd>@context.Option2Type - @context.Option2</MudTd>
+    <MudTd>@context.Option3Type - @context.Option3</MudTd>
+    <MudTh>
+      @if (context.Asset.ProductType == (int)ProductType.POD)
+      {
+        <MudImage Src="@GetImage(context)" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+      }
+    </MudTh>
+    <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
+      <ActivatorContent>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.CloudUpload">
+          Upload
+        </MudButton>
+      </ActivatorContent>
+    </MudFileUpload>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+
+<MudButton @onclick="Back" Variant="Variant.Filled" Color="Color.Primary">
+  Back
+</MudButton>
+@* *@
+@* <MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary"> *@
+@*   Open Simple Dialog *@
+@* </MudButton> *@
+@code {
+
+  [Parameter] public string assetId { get; set; }
+  private string _searchString = "";
+  private bool _isLoading;
+  private MudTable<AssetVariant> table;
+  private List<BreadcrumbItem> _items;
+  IList<IBrowserFile> _files = new List<IBrowserFile>();
+
+
+  protected override async Task OnInitializedAsync()
+  {
+    _items =
+    [
+      new BreadcrumbItem("Assets", "assets"),
+      new BreadcrumbItem("Asset Variants", "assetvariants/" + assetId)
+    ];
+  }
+
+  private async Task OpenDialogAsync()
+  {
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      MaxWidth = MaxWidth.Small
+    };
+
+    await table.ReloadServerData();
+  }
+
+  private void Back()
+  {
+    NavigationManager.NavigateTo("assets");
+  }
+
+  private async Task<TableData<AssetVariant>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var service = new AssetVariantService();
+    var response = await service.GetAllAssetVariantsByIdAsync(long.Parse(assetId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var json = response.Data.Payload.ToString();
+    var pagedData = JsonConvert.DeserializeObject<List<AssetVariant>>(json);
+    _isLoading = false;
+    return new TableData<AssetVariant>() { TotalItems = response.Pagination.Total, Items = pagedData };
+  }
+
+  private void OnSearch(string text)
+  {
+    _searchString = text;
+    table.ReloadServerData();
+  }
+  
+  private async Task UploadFiles(IBrowserFile? file, AssetVariant assetVariant )
+  {
+    if (file != null)
+    {
+      _isLoading = true;
+      _files.Add(file);
+      var stream = file.OpenReadStream(10 * 1024 * 1024);
+      var fileBytes = await StreamToByteArray(stream);
+
+      var service = new AssetVariantService();
+      var response = await service.GetAssetVariantByIdAsync((long)assetVariant.Id);
+      var json = response.Data.Payload.ToString();
+      assetVariant = JsonConvert.DeserializeObject<AssetVariant>(json);
+      assetVariant.BaseArtwork = fileBytes.ToArray();
+      await service.UpdateAssetVariantAsync(assetVariant);
+      await table.ReloadServerData();
+    }
+  }
+  
+  private async Task<byte[]> StreamToByteArray(Stream stream)
+  {
+    using (MemoryStream ms = new MemoryStream())
+    {
+      await stream.CopyToAsync(ms); // Use the async method
+      return ms.ToArray();
+    }
+  }
+  
+  string GetImage(AssetVariant assetVariant)
+  {
+    if (assetVariant?.BaseArtwork != null && assetVariant.BaseArtwork.Length != 0)
+    {
+      var imagesrc= Convert.ToBase64String(assetVariant.BaseArtwork);
+      return $"data:image/jpeg;base64,{imagesrc}";
+    }
+
+    return "";
+  }
+
+
+}

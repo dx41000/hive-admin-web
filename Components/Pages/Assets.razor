@@ -1,0 +1,132 @@
+﻿@page "/assets"
+@using hive_admin_web.Models
+@using hive_admin_web.Services
+@using Newtonsoft.Json
+@using CreateAsset = hive_admin_web.Components.Dialog.CreateAsset
+@using CreateProductDraft = hive_admin_web.Components.Dialog.CreateProductDraft
+@inject IDialogService DialogService
+
+<PageTitle>Assets</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Assets</MudText>
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="_table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Asset Variants</MudText>
+    <MudSpacer />
+    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Name" T="AssetVariant">
+        Name
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+      <MudTableSortLabel SortLabel="HsCode" T="AssetVariant">
+        HsCode
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+      <MudTableSortLabel SortLabel="ProductType" T="AssetVariant">
+        Asset Type
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+
+    </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd><a href="assetvariants/@context.Id">@context.Name</a></MudTd>
+    <MudTd>@context.HsCode</MudTd>
+    <MudTd>@(context.ProductType == 1 ? "Pod" : "All Over")</MudTd>
+    <MudTd>
+      <MudButton @onclick="() => CreateAssetDraft(context.Id)" Variant="Variant.Filled" Color="Color.Primary">
+        Create Product
+      </MudButton>
+    </MudTd>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+
+<MudButton @onclick="OpenDialogAsync
+           
+" Variant="Variant.Filled" Color="Color.Primary">
+  Add Asset
+</MudButton>
+@code {
+
+  private bool _isLoading;
+  private string _searchString = "";
+  private MudTable<Asset> _table;
+
+  private List<BreadcrumbItem> _items =
+  [
+    new("Assets", href: "assets")
+  ];
+
+  private async Task OpenDialogAsync()
+  {
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      MaxWidth = MaxWidth.Small
+    };
+
+    //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
+    var result = await (await DialogService.ShowAsync<CreateAsset>("Create Product", options)).Result;
+    var returnedValue = result.Data as string ?? string.Empty;
+    await _table.ReloadServerData();
+  }
+
+  private async Task CreateAssetDraft(long? assetId)
+  {
+    var parameters = new DialogParameters<CreateProductDraft>()
+    {
+      { x => x.AssetId, assetId }
+    };
+
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      MaxWidth = MaxWidth.Small
+    };
+
+    //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
+    var result = await (await DialogService.ShowAsync<CreateProductDraft>("Create Asset", parameters,  options)).Result;
+    var returnedValue = result.Data as string ?? string.Empty;
+    
+    await _table.ReloadServerData();
+  }
+
+
+  private async Task<TableData<Asset>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var service = new AssetService();
+    var response = await service.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var json = response.Data.Payload.ToString();
+    var pagedData = JsonConvert.DeserializeObject<List<Asset>>(json);
+    _isLoading = false;
+    return new TableData<Asset>() { TotalItems = response.Pagination.Total, Items = pagedData };
+  }
+
+  private void OnSearch(string text)
+  {
+    _searchString = text;
+    _table.ReloadServerData();
+  }
+}

@@ -1,0 +1,36 @@
+@using hive_admin_web.Components.Designer.ProductDesigner
+@using hive_admin_web.Models
+
+
+<MudDialog>
+  <DialogContent>
+    <ProductDesigner @ref="productDesignerRef"  ProductVariantView="ProductVariantView"></ProductDesigner>
+    <MudButton OnClick="Submit"  Color="Color.Primary">Save Design</MudButton>
+  </DialogContent>
+</MudDialog>
+
+
+
+@code {
+
+  [CascadingParameter]
+  private MudDialogInstance MudDialog { get; set; }
+  
+  private ProductDesigner productDesignerRef;
+  
+  [Parameter]
+  public ProductVariantView ProductVariantView { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+  }
+  
+  private async Task Submit()
+  {
+    await productDesignerRef.GetProduct();
+    MudDialog.Close(DialogResult.Ok(ProductVariantView));
+  }
+
+  private void Cancel() => MudDialog.Cancel();
+
+}

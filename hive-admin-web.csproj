@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>hive_admin_web</RootNamespace>
+    <PackageId>hive-admin-web</PackageId>
+    <Authors>hive-admin-web</Authors>
+    <Company>hive-admin-web</Company>
+    <Product>hive-admin-web</Product>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="7.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+    <PackageReference Include="SkiaSharp.Views.Blazor" Version="3.116.1" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\carbon.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\grune_2.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\grunge_1.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\lines_green.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\lines_purple.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\lines_red.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\wood_1.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\wood_2.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fpd\images\patterns\wood_3.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\fonts\FontFPD.eot" />
+    <_ContentIncludedByDefault Remove="wwwroot\fonts\FontFPD.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\fonts\FontFPD.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\fonts\FontFPD.woff" />
+    <_ContentIncludedByDefault Remove="wwwroot\html\canvaserror.html" />
+    <_ContentIncludedByDefault Remove="wwwroot\html\instagram_auth.html" />
+    <_ContentIncludedByDefault Remove="wwwroot\html\productdesigner.html" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\html\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Remove="wwwroot\html\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Remove="wwwroot\html\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Remove="wwwroot\html\**" />
+  </ItemGroup>
+</Project>

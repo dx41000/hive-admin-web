@@ -1,0 +1,106 @@
+@using System.ComponentModel.DataAnnotations
+@using System.Text.RegularExpressions
+@using hive_admin_web.Services
+<MudPaper Style="width: 100%">
+  <MudStepper CenterLabels="true" ShowResetButton>
+    <MudStep Title="Details">
+      <MudGrid>
+        <MudItem xs="12" sm="12">
+          <MudPaper Class="pa-4">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+              <MudTextField @bind-Value="_asset.Name" T="string" Label="Name" Required="true" RequiredError="Name is required!" />
+              <MudTextField @bind-Value="_asset.Description" T="string" Label="Description" Required="true" RequiredError="Description is required!"  />
+              <MudTextField @bind-Value="_asset.HsCode" T="string" Label="HS Code" Required="true" RequiredError="Password is required!"/>
+              <MudField T="string" Label="Type"/>
+              <div class="d-flex">
+                <MudRadioGroup T="string" @bind-Value="_asset.ProductType"  Required="true" RequiredError="Product type is required!">
+                  <MudRadio Value="@("POD")">Print on demand</MudRadio>
+                  <MudRadio Value="@("Static")">Pre Printed</MudRadio>
+                </MudRadioGroup>
+              </div>
+            </MudForm>
+          </MudPaper>
+        </MudItem>
+      </MudGrid>
+    </MudStep>
+    <MudStep Title="Variants">
+      <MudGrid>
+        <MudItem xs="12" sm="12">
+          <MudPaper Class="pa-4">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+              <MudTextField T="string" @bind-Value="_asset.OptionSetType1" Label="Variant Type 1 (e.g. Sex)" Required="true" />
+              <MudTextField T="string" @bind-Value="_asset.OptionSet1" Label="Variant Type 1 List (e.g. 'Male,Female, Unisex')" Required="true" />
+              @* <MudField T="string" Label="Requires Print File ?"/> *@
+              @* <div class="d-flex"> *@
+              @*   <MudRadioGroup T="string"  Required="true" RequiredError="Account type is required!"> *@
+              @*     <MudRadio Value="@("true")">True</MudRadio> *@
+              @*     <MudRadio Value="@("false")">False</MudRadio> *@
+              @*   </MudRadioGroup> *@
+              @* </div> *@
+              <MudTextField T="string" @bind-Value="_asset.OptionSetType2" Label="Variant Type 2 (e.g. Size)" Required="true" />
+              <MudTextField T="string" @bind-Value="_asset.OptionSet2"  Label="Variant Type 2 List (e.g. 'S,M,L')" Required="false"  />
+              @* <MudField T="string" Label="Requires Print File ?"/> *@
+              @* <div class="d-flex"> *@
+              @*   <MudRadioGroup T="string"  Required="true" RequiredError="Account type is required!"> *@
+              @*     <MudRadio Value="@("true")">True</MudRadio> *@
+              @*     <MudRadio Value="@("false")">False</MudRadio> *@
+              @*   </MudRadioGroup> *@
+              @* </div> *@
+              <MudTextField T="string" @bind-Value="_asset.OptionSetType3" Label="Variant Type 3 (e.g. Colour)" Required="true" />
+              <MudTextField T="string" @bind-Value="_asset.OptionSet3"  Label="Variant Type 3 List (e.g. 'Red, Blue, Green')" Required="false"/>
+              @* <MudField T="string" Label="Requires Print File ?"/> *@
+              @* <div class="d-flex"> *@
+              @*   <MudRadioGroup T="string"  Required="true" RequiredError="Account type is required!"> *@
+              @*     <MudRadio Value="@("true")">True</MudRadio> *@
+              @*     <MudRadio Value="@("false")">False</MudRadio> *@
+              @*   </MudRadioGroup> *@
+              @* </div> *@
+            </MudForm>
+          </MudPaper>
+        </MudItem>
+      </MudGrid>
+    </MudStep>
+    <MudStep Title="Views">
+      <MudGrid>
+        <MudItem xs="12" sm="12">
+          <MudPaper Class="pa-4">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+              <MudTextField T="string" @bind-Value="_asset.Views"  Label="View List (e.g. 'Front, Back, Sleeve, Cap')" Required="true" />
+              <br/>
+              <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto" OnClick="Create">Create</MudButton>
+            </MudForm>
+          </MudPaper>
+        </MudItem>
+      </MudGrid>
+    </MudStep>
+  </MudStepper>
+</MudPaper>
+<MudButton OnClick="Callback">Click me</MudButton>
+
+@code {
+  bool success;
+  string[] errors = { };
+  MudForm form;
+  hive_admin_web.Models.CreateAsset _asset;
+
+  [CascadingParameter]
+  private MudDialogInstance MudDialog { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    _asset = new Models.CreateAsset();
+  }
+
+  private async Task Create()
+  {
+    var productService = new AssetService();
+    await productService.CreateProductAsync(_asset, "");
+    MudDialog.Close(DialogResult.Ok("ProductCreated"));
+  }
+
+  private void Callback()
+  {
+    MudDialog.Close(DialogResult.Ok("ProductCreated"));
+  }
+
+}

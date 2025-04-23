@@ -1,0 +1,19 @@
+[
+    {
+        "category": "Product Category One",
+        "products": [
+            [
+                {
+                    "title": "Front",
+                    "thumbnail": "images/shirt_turq/front_turquoise.png",
+                    "options": {
+                        "stageWidth": "800"
+                    },
+                    "elements": [
+                       
+                    ]
+                }
+            ]
+        ]
+    }
+]
