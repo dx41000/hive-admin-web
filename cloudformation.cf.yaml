@@ -155,9 +155,10 @@ Resources:
       GroupDescription: Allow traffic from ALB only
       VpcId: !Ref VpcId
       SecurityGroupIngress:
-        - IpProtocol: -1
-          FromPort: 0
-          ToPort: 0
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
           SourceSecurityGroupId: !Ref ALBSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: -1
