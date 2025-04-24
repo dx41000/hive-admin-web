@@ -27,7 +27,7 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub web-tg1-${EnvironmentName}
+      Name: web-tg1
       Port: 8080
       Protocol: HTTP
       VpcId: !Ref VpcId
@@ -43,12 +43,11 @@ Resources:
   TargetGroup2:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub "web-tg2-${EnvironmentName}"
+      Name: web-tg2
       Port: 8081
       Protocol: HTTP
-      VpcId: !Ref VpcId  # Assuming this parameter or resource is defined elsewhere
+      VpcId: !Ref VpcId 
       TargetType: ip
-      HealthCheckEnabled: true
       HealthCheckProtocol: HTTP
       HealthCheckPath: /home
       HealthCheckIntervalSeconds: 90
@@ -100,8 +99,8 @@ Resources:
           Environment:
             - Name: ASPNETCORE_ENVIRONMENT
               Value: !Sub "${EnvironmentName}"
-            - Name: ASPNETCORE_URLS
-              Value: http://+:8080
+            # - Name: ASPNETCORE_URLS
+            #   Value: http://+:8080
           Ulimits:
             - Name: nofile
               SoftLimit: 1048576
