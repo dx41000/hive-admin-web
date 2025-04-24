@@ -27,7 +27,7 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: web-tg1
+      Name: !Sub web-tg1-${EnvironmentName}
       Port: 8080
       Protocol: HTTP
       VpcId: !Ref VpcId
@@ -43,7 +43,7 @@ Resources:
   TargetGroup2:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: web-tg2
+      Name: !Sub web-tg2-${EnvironmentName}
       Port: 8081
       Protocol: HTTP
       VpcId: !Ref VpcId 
