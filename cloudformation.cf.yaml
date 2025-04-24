@@ -33,8 +33,8 @@ Resources:
       VpcId: !Ref VpcId
       TargetType: ip
       HealthCheckPath: /health
-      HealthCheckIntervalSeconds: 90
-      HealthCheckTimeoutSeconds: 20
+      HealthCheckIntervalSeconds: 300
+      HealthCheckTimeoutSeconds: 120
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 2
       Matcher:
