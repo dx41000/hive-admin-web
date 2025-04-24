@@ -39,6 +39,11 @@ Resources:
       UnhealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-299
+      Tags:
+        - Key: System
+          Value: Hive
+        - Key: Environment
+          Value: !Ref EnvironmentName
 
   TargetGroup2:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -56,6 +61,11 @@ Resources:
       UnhealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-299
+      Tags:
+        - Key: System
+          Value: Hive
+        - Key: Environment
+          Value: !Ref EnvironmentName
 
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -103,6 +113,7 @@ Resources:
             - Name: nofile
               SoftLimit: 1048576
               HardLimit: 1048576
+    # NOTE: TaskDefinition doesn't support tags directly in CloudFormation
 
   TaskExecutionRole:
     Type: AWS::IAM::Role
@@ -152,6 +163,11 @@ Resources:
       TaskDefinition: !Ref TaskDefinition
       DeploymentController:
         Type: CODE_DEPLOY
+      Tags:
+        - Key: System
+          Value: Hive
+        - Key: Environment
+          Value: !Ref EnvironmentName
 
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -169,6 +185,11 @@ Resources:
           FromPort: 0
           ToPort: 0
           CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: System
+          Value: Hive
+        - Key: Environment
+          Value: !Ref EnvironmentName
 
   ECSTaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -187,3 +208,8 @@ Resources:
           FromPort: 0
           ToPort: 0
           CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: System
+          Value: Hive
+        - Key: Environment
+          Value: !Ref EnvironmentName
