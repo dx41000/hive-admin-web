@@ -1,53 +1,16 @@
-using MudBlazor.Services;
-using hive_admin_web.Components;
-using Microsoft.AspNetCore.Http.Features;
+namespace hive_admin_web;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddSignalR(o =>
+public class Program
 {
-    o.EnableDetailedErrors = true;
-    o.MaximumReceiveMessageSize = 10 * 1024 * 1024;; // Set to 10MB, or any value you prefer    
-});
+    public static void Main(string[] args)
+    {
+        CreateHostBuilder(args).Build().Run();
+    }
 
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024;  // Set to 10MB, or any value you prefer
-});
-
-builder.Services.Configure<IISServerOptions>(options =>
-{
-    options.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
-});
-
-// Add MudBlazor services
-builder.Services.AddMudServices();
-
-// Register HttpClient for Blazor Server (Blazor WebAssembly does this automatically)
-builder.Services.AddHttpClient();
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
 }
-
-app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-app.UseAntiforgery();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.MapGet("/health", () => Results.Ok("Healthy"));
-
-app.Run();
