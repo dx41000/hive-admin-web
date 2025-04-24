@@ -3,11 +3,13 @@
 @using hive_admin_web.Models.Enum
 @using hive_admin_web.Models.PrintReady
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-
+@inject IProductVariantService ProductVariantService;
+@inject IProductariantViewService ProductariantViewService;
 <PageTitle>Product Variants</PageTitle>
 
 <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
@@ -108,8 +110,7 @@ TestPrintFile
   private async Task<TableData<ProductVariant>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var service = new ProductVariantService();
-    var response = await service.GetAllProductVariantsAsync(long.Parse(productDraftId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await ProductVariantService.GetAllProductVariantsAsync(long.Parse(productDraftId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<ProductVariant>>(json);
     _isLoading = false;
@@ -126,9 +127,8 @@ TestPrintFile
   {
     _isLoading = true;
     overlayVisible = true;
-    var service = new ProductariantViewService();
     
-    var response = await service.GetPrintFile(new GenerateImageRequest
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
       ProductVariantDraftId = (long)productVariant.Id,
       ProductType = (int)productVariant.AssetVariant.Asset.ProductType,

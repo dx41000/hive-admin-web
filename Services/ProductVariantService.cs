@@ -1,19 +1,13 @@
 using hive_admin_web.Models;
+using hive_admin_web.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace hive_admin_web.Services;
 
-public class ProductVariantService
+public class ProductVariantService(IHttpClientFactory httpClientFactory) : IProductVariantService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _baseUrl = "https://localhost:7026"; // Replace with your base API URL
-
-    public ProductVariantService()
-    {
-        _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri(_baseUrl);
-    }
-
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
+    
     // Example: Get all products (with pagination)
     public async Task<PagedResponse> GetAllProductVariantsAsync(long productId, int page, int count, string search = null,
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")

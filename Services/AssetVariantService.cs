@@ -1,20 +1,13 @@
 using System.Net.Http.Headers;
 using hive_admin_web.Models;
+using hive_admin_web.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace hive_admin_web.Services;
 
-public class AssetVariantService
+public class AssetVariantService(IHttpClientFactory httpClientFactory) : IAssetVariantService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _baseUrl = "https://localhost:7026"; // Replace with your base API URL
-
-    public AssetVariantService()
-    {
-        _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri(_baseUrl);
-    }
-
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
     // Set default headers
     private void SetDefaultHeaders(string apiVersion)
     {
@@ -28,9 +21,7 @@ public class AssetVariantService
     {
         SetDefaultHeaders(apiVersion);
 
-        var url = $"{_baseUrl}/api/assetvariant/{assetVariantId}";
-
-        HttpResponseMessage response = await _httpClient.DeleteAsync(url);
+        HttpResponseMessage response = await _httpClient.DeleteAsync($"/api/assetvariant/{assetVariantId}");
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception($"Error deleting product variant: {response.StatusCode}");
@@ -43,10 +34,7 @@ public class AssetVariantService
     {
         SetDefaultHeaders(apiVersion);
 
-        var url =
-            $"{_baseUrl}/api/assetvariant/all?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}";
-
-        HttpResponseMessage response = await _httpClient.GetAsync(url);
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/assetvariant/all?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}");
         if (response.IsSuccessStatusCode)
         {
             var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -63,10 +51,7 @@ public class AssetVariantService
     {
         SetDefaultHeaders(apiVersion);
 
-        var url =
-            $"{_baseUrl}/api/assetvariant/all/{assetId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}";
-
-        HttpResponseMessage response = await _httpClient.GetAsync(url);
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/assetvariant/all/{assetId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}");
         if (response.IsSuccessStatusCode)
         {
             var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -84,10 +69,7 @@ public class AssetVariantService
     {
         SetDefaultHeaders(apiVersion);
 
-        var url =
-            $"{_baseUrl}/api/assetvariant/{assetVariantId}";
-
-        HttpResponseMessage response = await _httpClient.GetAsync(url);
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/assetvariant/{assetVariantId}");
         if (response.IsSuccessStatusCode)
         {
             var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -105,11 +87,10 @@ public class AssetVariantService
     {
         SetDefaultHeaders(apiVersion);
 
-        var url = $"{_baseUrl}/api/assetvariant";
         var content = new StringContent(JsonConvert.SerializeObject(assetVariant), System.Text.Encoding.UTF8,
             "application/json");
 
-        HttpResponseMessage response = await _httpClient.PostAsync(url, content);
+        HttpResponseMessage response = await _httpClient.PostAsync("/api/assetvariant", content);
         if (response.IsSuccessStatusCode)
         {
             var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -127,11 +108,10 @@ public class AssetVariantService
     {
         SetDefaultHeaders(apiVersion);
 
-        var url = $"{_baseUrl}/api/assetvariant";
         var content = new StringContent(JsonConvert.SerializeObject(assetVariant), System.Text.Encoding.UTF8,
             "application/json");
 
-        HttpResponseMessage response = await _httpClient.PutAsync(url, content);
+        HttpResponseMessage response = await _httpClient.PutAsync("/api/assetvariant", content);
         if (response.IsSuccessStatusCode)
         {
             var jsonResponse = await response.Content.ReadAsStringAsync();

@@ -1,10 +1,11 @@
 ﻿@page "/Products"
 @using hive_admin_web.Models
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @using CreateProduct = hive_admin_web.Components.Dialog.CreateAsset
 @inject IDialogService DialogService
-
+@inject IProductService ProductService;
 <PageTitle>Products</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">Products</MudText>
@@ -80,8 +81,7 @@
   private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var service = new ProductService();
-    var response = await service.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await ProductService.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<Product>>(json);
     _isLoading = false;

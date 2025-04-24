@@ -4,10 +4,12 @@
 @using hive_admin_web.Models.Enum
 @using hive_admin_web.Models.PrintReady
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using hive.core.models.PrintReady
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @inject IJSRuntime JsRuntime
+@inject IProductariantViewService ProductariantViewService;
 <MudPaper>
   <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
     <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
@@ -473,8 +475,7 @@
   {
     overlayVisible = true;
     
-    var service = new ProductariantViewService();
-    var response = await service.GetPrintFile(new GenerateImageRequest
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
       ProductVariantDraftId = (long)ProductVariantView.ProductVariantId,
       ProductType = (int)ProductType.POD,

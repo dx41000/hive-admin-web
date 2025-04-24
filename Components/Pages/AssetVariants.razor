@@ -2,10 +2,10 @@
 @using hive_admin_web.Models
 @using hive_admin_web.Models.Enum
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
-@using SkiaSharp
-@inject IDialogService DialogService
 @inject NavigationManager NavigationManager
+@inject IAssetVariantService AssetVariantService;
 
 <PageTitle>Asset Variants</PageTitle>
 
@@ -116,8 +116,7 @@
   private async Task<TableData<AssetVariant>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var service = new AssetVariantService();
-    var response = await service.GetAllAssetVariantsByIdAsync(long.Parse(assetId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetVariantService.GetAllAssetVariantsByIdAsync(long.Parse(assetId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<AssetVariant>>(json);
     _isLoading = false;
@@ -139,12 +138,11 @@
       var stream = file.OpenReadStream(10 * 1024 * 1024);
       var fileBytes = await StreamToByteArray(stream);
 
-      var service = new AssetVariantService();
-      var response = await service.GetAssetVariantByIdAsync((long)assetVariant.Id);
+      var response = await AssetVariantService.GetAssetVariantByIdAsync((long)assetVariant.Id);
       var json = response.Data.Payload.ToString();
       assetVariant = JsonConvert.DeserializeObject<AssetVariant>(json);
       assetVariant.BaseArtwork = fileBytes.ToArray();
-      await service.UpdateAssetVariantAsync(assetVariant);
+      await AssetVariantService.UpdateAssetVariantAsync(assetVariant);
       await table.ReloadServerData();
     }
   }

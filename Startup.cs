@@ -1,4 +1,7 @@
 ﻿using hive_admin_web.Components;
+using hive_admin_web.Models.AppSettings;
+using hive_admin_web.Services;
+using hive_admin_web.Services.Interfaces;
 using Microsoft.AspNetCore.Http.Features;
 using MudBlazor.Services;
 
@@ -10,6 +13,18 @@ public class Startup(IConfiguration configuration)
 
     public void ConfigureServices(IServiceCollection services)
     {
+        var config = new Config();
+        Configuration.Bind("Config", config);
+        services.AddSingleton(config);
+
+        services.AddTransient<IAssetService, AssetService>();
+        services.AddTransient<IAssetVariantService, AssetVariantService>();
+        services.AddTransient<IAssetVariantViewService, AssetVariantViewService>();
+        services.AddTransient<IImageDownloaderService, ImageDownloaderService>();
+        services.AddTransient<IProductariantViewService, ProductariantViewService>();
+        services.AddTransient<IProductService, ProductService>();
+        services.AddTransient<IProductVariantService, ProductVariantService>();
+        
         // Configure SignalR
         services.AddSignalR(options =>
         {
@@ -33,7 +48,10 @@ public class Startup(IConfiguration configuration)
         services.AddMudServices();
 
         // Register HttpClient
-        services.AddHttpClient();
+        services.AddHttpClient("HiveCore", client =>
+        {
+            client.BaseAddress = new Uri(config.BaseUrl);
+        });
 
         // Add Razor components
         services.AddRazorComponents()

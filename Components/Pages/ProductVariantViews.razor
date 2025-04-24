@@ -4,11 +4,12 @@
 @using hive_admin_web.Models.Enum
 @using hive_admin_web.Models.PrintReady
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-
+@inject IProductariantViewService ProductariantViewService;
 
 <PageTitle>Product Variant Views</PageTitle>
 
@@ -126,8 +127,7 @@
 
   private async Task SaveView(ProductVariantView productVariantView)
   {
-    var productDraftVariantViewService = new ProductariantViewService();
-    await productDraftVariantViewService.UpdateProductVariantViewAsync(productVariantView);
+    await ProductariantViewService.UpdateProductVariantViewAsync(productVariantView);
   }
 
   private void Back()
@@ -139,8 +139,7 @@
   private async Task<TableData<ProductVariantView>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var service = new ProductariantViewService();
-    var response = await service.GetAllProductDrafVariantViewsByIdAsync(long.Parse(productDraftVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await ProductariantViewService.GetAllProductDrafVariantViewsByIdAsync(long.Parse(productDraftVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
     _isLoading = false;
@@ -157,9 +156,8 @@
   {
     _isLoading = true;
     overlayVisible = true;
-    var service = new ProductariantViewService();
-
-    var response = await service.GetPrintFile(new GenerateImageRequest
+    
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
       ProductType = (int)productVariantView.ProductType,
       ProductVariantDraftId = (long)productVariantView.ProductVariantId,
@@ -177,9 +175,7 @@
   {
     _isLoading = true;
     overlayVisible = true;
-    var service = new ProductariantViewService();
-
-    var response = await service.CopyDesign(productVariantView);
+    var response = await ProductariantViewService.CopyDesign(productVariantView);
     
     overlayVisible = false;
     _isLoading = false;

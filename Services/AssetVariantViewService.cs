@@ -1,20 +1,15 @@
 using System.Net.Http.Headers;
 using System.Text;
 using hive_admin_web.Models;
+using hive_admin_web.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace hive_admin_web.Services
 {
-    public class AssetVariantViewService
+    public class AssetVariantViewService(IHttpClientFactory httpClientFactory) : IAssetVariantViewService
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _baseUrl = "https://localhost:7026"; // Replace with your base API URL
+        private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
 
-        public AssetVariantViewService()
-        {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(_baseUrl);
-        }
 
         // Set default headers
         private void SetDefaultHeaders(string apiVersion)

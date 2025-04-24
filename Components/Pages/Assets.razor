@@ -1,10 +1,12 @@
 ﻿@page "/assets"
 @using hive_admin_web.Models
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @using CreateAsset = hive_admin_web.Components.Dialog.CreateAsset
 @using CreateProductDraft = hive_admin_web.Components.Dialog.CreateProductDraft
 @inject IDialogService DialogService
+@inject IAssetService AssetService;
 
 <PageTitle>Assets</PageTitle>
 
@@ -116,8 +118,7 @@
   private async Task<TableData<Asset>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var service = new AssetService();
-    var response = await service.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetService.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<Asset>>(json);
     _isLoading = false;

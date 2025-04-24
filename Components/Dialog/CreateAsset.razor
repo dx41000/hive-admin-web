@@ -1,6 +1,6 @@
-@using System.ComponentModel.DataAnnotations
-@using System.Text.RegularExpressions
-@using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
+@inject IAssetService AssetService;
+
 <MudPaper Style="width: 100%">
   <MudStepper CenterLabels="true" ShowResetButton>
     <MudStep Title="Details">
@@ -93,8 +93,7 @@
 
   private async Task Create()
   {
-    var productService = new AssetService();
-    await productService.CreateProductAsync(_asset, "");
+    await AssetService.CreateProductAsync(_asset, "");
     MudDialog.Close(DialogResult.Ok("ProductCreated"));
   }
 

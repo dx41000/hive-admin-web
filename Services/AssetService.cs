@@ -1,19 +1,13 @@
 using System.Text;
 using hive_admin_web.Models;
+using hive_admin_web.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace hive_admin_web.Services;
 
-public class AssetService
+public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _baseUrl = "http://hive-core-alb-production-1562672820.eu-west-2.elb.amazonaws.com:49158"; // Replace with your base API URL
-
-    public AssetService()
-    {
-        _httpClient = new HttpClient();
-        _httpClient.BaseAddress = new Uri(_baseUrl);
-    }
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
 
     // Example: Get product by ID
     public async Task<Asset> GetProductByIdAsync(long assetId, string apiVersion = null)

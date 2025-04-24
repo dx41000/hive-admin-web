@@ -3,12 +3,12 @@
 @using hive_admin_web.Models
 @using hive_admin_web.Models.Enum
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @using SkiaSharp
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
-
-
+@inject IAssetVariantViewService AssetVariantViewService;
 <PageTitle>Asset Variant Views</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">Asset Variant Views</MudText>
@@ -122,10 +122,7 @@
 
   private async Task OpenDialogAsync(AssetVariantView assetVariantView)
   {
-    
-    var service = new AssetVariantViewService();
-
-    var response = await service.GetAssetVariantViewByIdAsync((long)assetVariantView.Id);
+    var response = await AssetVariantViewService.GetAssetVariantViewByIdAsync((long)assetVariantView.Id);
     var json = response.Data.Payload.ToString();
     assetVariantView = JsonConvert.DeserializeObject<AssetVariantView>(json);
     
@@ -159,8 +156,7 @@
 
   private async Task SaveView(AssetVariantView assetVariantView)
   {
-    var productVariantViewService = new AssetVariantViewService();
-    await productVariantViewService.UpdateAssetVariantViewAsync(assetVariantView);
+    await AssetVariantViewService.UpdateAssetVariantViewAsync(assetVariantView);
   }
 
   private void Back()
@@ -172,8 +168,7 @@
   private async Task<TableData<AssetVariantView>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var service = new AssetVariantViewService();
-    var response = await service.GetAllAssetVariantViewsByIdAsync(long.Parse(productVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetVariantViewService.GetAllAssetVariantViewsByIdAsync(long.Parse(productVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<AssetVariantView>>(json);
     _isLoading = false;
@@ -198,8 +193,7 @@
       var skImage = SKImage.FromEncodedData(assetVariantView.PrintFile);
       assetVariantView.OutputHeight = skImage.Height;
       assetVariantView.OutputWidth = skImage.Width;
-      var service = new AssetVariantViewService();
-      await service.UpdateAssetVariantViewAsync(assetVariantView);
+      await AssetVariantViewService.UpdateAssetVariantViewAsync(assetVariantView);
       await table.ReloadServerData();
     }
   }

@@ -3,10 +3,11 @@
 @using System.Text.Json
 @using hive_admin_web.Models
 @using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json.Linq
 @using SkiaSharp
 @inject IJSRuntime JSRuntime
-
+@inject IImageDownloaderService ImageDownloaderService;
 
 <MudText Typo="Typo.h4" GutterBottom="true">Design View</MudText>
 
@@ -171,8 +172,7 @@
   {
     if (AssetVariantView?.AssetVariant?.BaseArtwork == null)
     {
-      var imageService = new ImageDownloaderService();
-      AssetVariantView.AssetVariant.BaseArtwork = await imageService.ConvertImageUrlToByteArrayAsync("http://localhost:5266/fpd/images/blank.jpg");
+      AssetVariantView.AssetVariant.BaseArtwork = await ImageDownloaderService.ConvertImageUrlToByteArrayAsync("http://localhost:5266/fpd/images/blank.jpg");
     }
 
     await Task.Delay(50);
