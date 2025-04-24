@@ -7,7 +7,7 @@ namespace hive_admin_web.Services;
 public class AssetService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _baseUrl = "https://localhost:7026"; // Replace with your base API URL
+    private readonly string _baseUrl = "http://hive-core-alb-production-1562672820.eu-west-2.elb.amazonaws.com:49158"; // Replace with your base API URL
 
     public AssetService()
     {
