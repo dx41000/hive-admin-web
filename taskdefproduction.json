@@ -1,5 +1,5 @@
 {
-  "executionRoleArn": "arn:aws:iam::891377085221:role/service-core-ecs-task-production",
+  "executionRoleArn": "arn:aws:iam::891377085221:role/hive-web-ecs-task-production",
   "containerDefinitions": [
       {
           "name": "hive-web",
@@ -16,9 +16,9 @@
             },            
           "portMappings": [
               {
-                  "hostPort": 80,
+                  "hostPort": 8080,
                   "protocol": "tcp",
-                  "containerPort": 80
+                  "containerPort": 8080
               }
           ],
           "environment":  [
@@ -28,7 +28,7 @@
               },
               {
                 "name": "ASPNETCORE_URLS",
-                "value": "http://+:80"
+                "value": "http://+:8080"
               }
             ]
       }
