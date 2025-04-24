@@ -32,7 +32,7 @@ Resources:
       Protocol: HTTP
       VpcId: !Ref VpcId
       TargetType: ip
-      HealthCheckPath: /home
+      HealthCheckPath: /health
       HealthCheckIntervalSeconds: 90
       HealthCheckTimeoutSeconds: 20
       HealthyThresholdCount: 2
@@ -49,7 +49,7 @@ Resources:
       VpcId: !Ref VpcId 
       TargetType: ip
       HealthCheckProtocol: HTTP
-      HealthCheckPath: /home
+      HealthCheckPath: /health
       HealthCheckIntervalSeconds: 90
       HealthCheckTimeoutSeconds: 20
       HealthyThresholdCount: 2
@@ -99,8 +99,8 @@ Resources:
           Environment:
             - Name: ASPNETCORE_ENVIRONMENT
               Value: !Sub "${EnvironmentName}"
-            # - Name: ASPNETCORE_URLS
-            #   Value: http://+:8080
+            - Name: ASPNETCORE_URLS
+              Value: http://+:8080
           Ulimits:
             - Name: nofile
               SoftLimit: 1048576
