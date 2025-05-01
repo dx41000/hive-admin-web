@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace hive_admin_web.Services;
 
-public class ProductService(IHttpClientFactory httpClientFactory) : IProductService
+public class ProductService(IHttpClientFactory httpClientFactory, AppState appState) : IProductService
 {
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
 
@@ -92,7 +92,7 @@ public class ProductService(IHttpClientFactory httpClientFactory) : IProductServ
     public async Task<PagedResponse> GetAllProductsAsync(int page, int count, string search = null,
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")
     {
-        var storeId = 1;
+        var storeId = appState.StoreId;
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"api/product/all/{storeId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}");
 
         if (!string.IsNullOrEmpty(apiVersion))
@@ -108,7 +108,7 @@ public class ProductService(IHttpClientFactory httpClientFactory) : IProductServ
 
     public async Task Wizard(CreateProduct createProduct,  string apiVersion = null)
     {
-        var storeId = 1;
+        var storeId = appState.StoreId;
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/product/wizard/{storeId}")
         {

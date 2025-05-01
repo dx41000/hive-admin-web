@@ -1,5 +1,8 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using hive_admin_web.Models
+@using hive_admin_web.Services.Interfaces
+@inherits LayoutComponentBase
+@inject IStoreService StoreService
+@inject AppState AppState
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -9,6 +12,20 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
         <MudSpacer />
+        <MudText>Selected Store: @AppState.StoreName</MudText>
+        @* <MudSelect T="long"  *@
+        @*            @bind-Value="StoreValue" *@
+        @*            Variant="Variant.Outlined" *@
+        @*            FitContent="true"> *@
+        @*      *@
+        @*     <MudSelectItem Value="@(-1L)">Please select a store</MudSelectItem> *@
+        @*     @foreach (var store in _stores) *@
+        @*     { *@
+        @*         <MudSelectItem Value="@store.Id">@store.Name</MudSelectItem> *@
+        @*     } *@
+        @* *@
+        @* *@
+        @* </MudSelect> *@
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
@@ -31,20 +48,35 @@
     private bool _drawerOpen = true;
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
+    
+    private IList<Store> _stores = new List<Store>();
+    
+    
+    // private long StoreValue
+    // {
+    //     get => AppState.StoreId;
+    //     set
+    //     {
+    //         AppState.StoreId = value;
+    //         AppState.StoreName = _stores.SingleOrDefault(x => x.Id == value)?.Name;
+    //     }
+    // }
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
-        base.OnInitialized();
-
         _theme = new()
         {
             PaletteLight = _lightPalette,
             PaletteDark = _darkPalette,
             LayoutProperties = new LayoutProperties()
         };
+        
+        _stores = await StoreService.GetStoresAsync();
+        AppState.StoreName = _stores.SingleOrDefault(x => x.Id == AppState.StoreId)?.Name;
+        StateHasChanged();
+        await base.OnInitializedAsync();
     }
-
-
+    
     private void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
@@ -99,6 +131,7 @@
         true => Icons.Material.Rounded.AutoMode,
         false => Icons.Material.Outlined.DarkMode,
     };
+    
 }
 
 

@@ -1,4 +1,5 @@
 ﻿using hive_admin_web.Components;
+using hive_admin_web.Models;
 using hive_admin_web.Models.AppSettings;
 using hive_admin_web.Services;
 using hive_admin_web.Services.Interfaces;
@@ -24,6 +25,9 @@ public class Startup(IConfiguration configuration)
         services.AddTransient<IProductariantViewService, ProductariantViewService>();
         services.AddTransient<IProductService, ProductService>();
         services.AddTransient<IProductVariantService, ProductVariantService>();
+        services.AddTransient<IStoreService, StoreService>();
+        services.AddSingleton<AppState>();
+
         
         // Configure SignalR
         services.AddSignalR(options =>

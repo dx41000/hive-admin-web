@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace hive_admin_web.Services;
 
-public class ProductVariantService(IHttpClientFactory httpClientFactory) : IProductVariantService
+public class ProductVariantService(IHttpClientFactory httpClientFactory, AppState appState) : IProductVariantService
 {
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
     
@@ -12,7 +12,7 @@ public class ProductVariantService(IHttpClientFactory httpClientFactory) : IProd
     public async Task<PagedResponse> GetAllProductVariantsAsync(long productId, int page, int count, string search = null,
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")
     {
-        var storeId = 1;
+        var storeId = appState.StoreId;
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"api/productvariant/all/{productId}/{storeId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}");
 
         if (!string.IsNullOrEmpty(apiVersion))
@@ -28,7 +28,7 @@ public class ProductVariantService(IHttpClientFactory httpClientFactory) : IProd
     
     public async Task<AssetVariant> GetProductVariantAsync(long productId, string apiVersion = "1.0")
     {
-        var storeId = 1;
+        var storeId = appState.StoreId;
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"api/productvariant/{productId}");
 
         if (!string.IsNullOrEmpty(apiVersion))

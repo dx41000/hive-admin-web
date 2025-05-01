@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace hive_admin_web.Services
 {
-    public class ProductariantViewService(IHttpClientFactory httpClientFactory) : IProductariantViewService
+    public class ProductariantViewService(IHttpClientFactory httpClientFactory, AppState appState) : IProductariantViewService
     {
         private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
 
@@ -25,7 +25,7 @@ namespace hive_admin_web.Services
         {
             SetDefaultHeaders(apiVersion);
 
-            var storeId = 1;
+            var storeId = appState.StoreId;
             var url = $"api/productvariantview/all/{productVariantViewId}/{storeId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
@@ -46,7 +46,7 @@ namespace hive_admin_web.Services
         {
             SetDefaultHeaders(apiVersion);
 
-            var storeId = 1;
+            var storeId = appState.StoreId;
             
             var url = $"api/productvariantview";
             var content = new StringContent(JsonConvert.SerializeObject(productVariantView), Encoding.UTF8,
@@ -71,7 +71,7 @@ namespace hive_admin_web.Services
         {
             SetDefaultHeaders(apiVersion);
 
-            var storeId = 1;
+            var storeId = appState.StoreId;
             
             var url = $"api/productvariantview/copydesign/{storeId}";
             var content = new StringContent(JsonConvert.SerializeObject(productVariantView), Encoding.UTF8,
