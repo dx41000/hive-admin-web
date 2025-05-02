@@ -6,8 +6,7 @@ public interface IProductService
 {
     Task<Product> CopyProductAsync(long productId, string productName, long storeId, string apiVersion = null);
     Task<Product> GetProductAsync(long productId, long storeId, string apiVersion = null);
-    Task DeleteProducttAsync(long productId, long storeId, string apiVersion = null);
-    Task DeleteProductAsync(long productId, long storeId);
+    Task DeleteProductAsync(long productId, string apiVersion = null);
     Task<Product> CreateProductAsync(long storeId, object productDraft, string apiVersion = null);
     Task<Product> UpdateProductAsync(long storeId, object productDraft, string apiVersion = null);
 

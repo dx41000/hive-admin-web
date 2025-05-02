@@ -40,9 +40,9 @@ public class ProductService(IHttpClientFactory httpClientFactory, AppState appSt
         return product;
     }
 
-    public async Task DeleteProducttAsync(long productId, long storeId, string apiVersion = null)
+    public async Task DeleteProductAsync(long productId, string apiVersion = null)
     {
-        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/product/{productId}/{storeId}");
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/product/{productId}/{appState.StoreId}");
 
         if (!string.IsNullOrEmpty(apiVersion))
             requestMessage.Headers.Add("api-version", apiVersion);
@@ -50,14 +50,7 @@ public class ProductService(IHttpClientFactory httpClientFactory, AppState appSt
         var response = await _httpClient.SendAsync(requestMessage);
         response.EnsureSuccessStatusCode();
     }
-
-    public async Task DeleteProductAsync(long productId, long storeId)
-    {
-        string url = $"/api/product/{productId}/{storeId}";
-        await _httpClient.DeleteAsync(url);
-    }
-
-
+    
     public async Task<Product> CreateProductAsync(long storeId, object productDraft, string apiVersion = null)
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/product/{storeId}");

@@ -42,4 +42,15 @@ public class ProductVariantService(IHttpClientFactory httpClientFactory, AppStat
         return productVariant;
     }
     
+    public async Task DeleteProductVariantAsync(long productVariantId, string apiVersion = null)
+    {
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/productVariant/{productVariantId}/{appState.StoreId}");
+
+        if (!string.IsNullOrEmpty(apiVersion))
+            requestMessage.Headers.Add("api-version", apiVersion);
+
+        var response = await _httpClient.SendAsync(requestMessage);
+        response.EnsureSuccessStatusCode();
+    }
+
 }

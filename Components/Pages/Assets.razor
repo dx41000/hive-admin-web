@@ -1,10 +1,11 @@
 ﻿@page "/assets"
+@using hive_admin_web.Components.Dialog
 @using hive_admin_web.Models
 @using hive_admin_web.Services
 @using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @using CreateAsset = hive_admin_web.Components.Dialog.CreateAsset
-@using CreateProductDraft = hive_admin_web.Components.Dialog.CreateProductDraft
+@using CreateProduct = hive_admin_web.Components.Dialog.CreateProductDraft
 @inject IDialogService DialogService
 @inject IAssetService AssetService;
 
@@ -38,14 +39,22 @@
     <MudTh>
 
     </MudTh>
+    <MudTh>
+
+    </MudTh>
   </HeaderContent>
   <RowTemplate>
     <MudTd><a href="assetvariants/@context.Id">@context.Name</a></MudTd>
     <MudTd>@context.HsCode</MudTd>
     <MudTd>@(context.ProductType == 1 ? "Pod" : "All Over")</MudTd>
     <MudTd>
-      <MudButton @onclick="() => CreateAssetDraft(context.Id)" Variant="Variant.Filled" Color="Color.Primary">
+      <MudButton @onclick="() => CreateAsset(context.Id)" Variant="Variant.Filled" Color="Color.Primary">
         Create Product
+      </MudButton>
+    </MudTd>
+    <MudTd>
+      <MudButton @onclick="() => DeleteAsset(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
+        Delete
       </MudButton>
     </MudTd>
   </RowTemplate>
@@ -53,10 +62,8 @@
     <MudTablePager />
   </PagerContent>
 </MudTable>
-
-<MudButton @onclick="OpenDialogAsync
-           
-" Variant="Variant.Filled" Color="Color.Primary">
+<br/>
+<MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary">
   Add Asset
 </MudButton>
 @code {
@@ -64,6 +71,7 @@
   private bool _isLoading;
   private string _searchString = "";
   private MudTable<Asset> _table;
+  private long selectAssetId;
 
   private List<BreadcrumbItem> _items =
   [
@@ -89,9 +97,38 @@
     await _table.ReloadServerData();
   }
 
-  private async Task CreateAssetDraft(long? assetId)
+  private async Task YesActionDeleteAsset()
   {
-    var parameters = new DialogParameters<CreateProductDraft>()
+    Console.WriteLine("Yes clicked : " + selectAssetId);
+    await AssetService.DeleteAssetByIdAsync(selectAssetId);
+    await _table.ReloadServerData();
+  }
+
+  private Task NoAction()
+  {
+    Console.WriteLine("No clicked");
+    return Task.CompletedTask;
+  }
+
+  private async Task DeleteAsset(long assetId)
+  {
+    selectAssetId = assetId;
+    var parameters = new DialogParameters
+    {
+      { "Title", "Delete Asset?" },
+      { "MainText", "Are you sure you want to delete this item?" },
+      { "OnYes", EventCallback.Factory.Create(this, YesActionDeleteAsset) },
+      { "OnNo", EventCallback.Factory.Create(this, NoAction) }
+    };
+
+    var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small };
+    await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+  }
+
+
+  private async Task CreateAsset(long? assetId)
+  {
+    var parameters = new DialogParameters<CreateProduct>()
     {
       { x => x.AssetId, assetId }
     };
@@ -108,7 +145,7 @@
     };
 
     //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
-    var result = await (await DialogService.ShowAsync<CreateProductDraft>("Create Asset", parameters,  options)).Result;
+    var result = await (await DialogService.ShowAsync<CreateProduct>("Create Asset", parameters,  options)).Result;
     var returnedValue = result.Data as string ?? string.Empty;
     
     await _table.ReloadServerData();
@@ -118,7 +155,7 @@
   private async Task<TableData<Asset>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await AssetService.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetService.GetAllAssetsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<Asset>>(json);
     _isLoading = false;

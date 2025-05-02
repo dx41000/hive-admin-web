@@ -34,6 +34,9 @@
     <MudTh>
 
     </MudTh>
+    <MudTh>
+
+    </MudTh>
   </HeaderContent>
   <RowTemplate>
     <MudTd>@context.Name</MudTd>
@@ -60,6 +63,11 @@
         </MudFileUpload>
       }
     </MudTd>
+    <MudTd>
+      <MudButton @onclick="() => DeleteAssetVariantView(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
+        Delete
+      </MudButton>
+    </MudTd>
   </RowTemplate>
   <PagerContent>
     <MudTablePager />
@@ -83,6 +91,8 @@
   private List<BreadcrumbItem> _items;
 
   IList<IBrowserFile> _files = new List<IBrowserFile>();
+  
+  private long selectAssetVariantViewId;
 
   string GetImage(AssetVariantView assetVariantView)
   {
@@ -196,6 +206,35 @@
       await AssetVariantViewService.UpdateAssetVariantViewAsync(assetVariantView);
       await table.ReloadServerData();
     }
+  }
+  
+  
+  private async Task DeleteAssetVariantView(long assetVariantId)
+  {
+    selectAssetVariantViewId = assetVariantId;
+    var parameters = new DialogParameters
+    {
+      { "Title", "Delete Asset Variant View ?" },
+      { "MainText", "Are you sure you want to delete this item?" },
+      { "OnYes", EventCallback.Factory.Create(this, YesActionDeleteAssetVariant) },
+      { "OnNo", EventCallback.Factory.Create(this, NoAction) }
+    };
+
+    var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small };
+    await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+  }
+  
+  private async Task YesActionDeleteAssetVariant()
+  {
+    Console.WriteLine("Yes clicked : " + selectAssetVariantViewId);
+    await AssetVariantViewService.DeleteAssetVariantViewAsync(selectAssetVariantViewId);
+    await table.ReloadServerData();
+  }
+
+  private Task NoAction()
+  {
+    Console.WriteLine("No clicked");
+    return Task.CompletedTask;
   }
 
 }

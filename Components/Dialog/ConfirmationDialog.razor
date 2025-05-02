@@ -1,0 +1,35 @@
+@using MudBlazor
+
+<MudDialog>
+  <DialogContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+    <MudText>@MainText</MudText>
+  </DialogContent>
+  <DialogActions>
+    <MudButton Color="Color.Primary" OnClick="OnYesClicked">Yes</MudButton>
+    <MudButton Color="Color.Secondary" OnClick="OnNoClicked">No</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+  [Parameter] public string Title { get; set; }
+  [Parameter] public string MainText { get; set; }
+  [Parameter] public EventCallback OnYes { get; set; }
+  [Parameter] public EventCallback OnNo { get; set; }
+
+  private async Task OnYesClicked()
+  {
+    if (OnYes.HasDelegate)
+      await OnYes.InvokeAsync();
+    MudDialog.Close(DialogResult.Ok(true));
+  }
+
+  private async Task OnNoClicked()
+  {
+    if (OnNo.HasDelegate)
+      await OnNo.InvokeAsync();
+    MudDialog.Cancel();
+  }
+}

@@ -93,7 +93,7 @@
 
   private async Task Create()
   {
-    await AssetService.CreateProductAsync(_asset, "");
+    await AssetService.CreateAssetAsync(_asset, "");
     MudDialog.Close(DialogResult.Ok("ProductCreated"));
   }
 

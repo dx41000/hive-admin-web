@@ -109,5 +109,17 @@ namespace hive_admin_web.Services
             var content = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ApiResponse>(content);
         }
+        
+        public async Task DeleteProductVariantViewAsync(long productVariantViewId, string apiVersion = null)
+        {
+            var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/productVariantView/{productVariantViewId}/{appState.StoreId}");
+
+            if (!string.IsNullOrEmpty(apiVersion))
+                requestMessage.Headers.Add("api-version", apiVersion);
+
+            var response = await _httpClient.SendAsync(requestMessage);
+            response.EnsureSuccessStatusCode();
+        }
+
     }
 }

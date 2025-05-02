@@ -10,7 +10,7 @@ public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("HiveCore");
 
     // Example: Get product by ID
-    public async Task<Asset> GetProductByIdAsync(long assetId, string apiVersion = null)
+    public async Task<Asset> GetAssetByIdAsync(long assetId, string apiVersion = null)
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/asset/{assetId}");
 
@@ -26,7 +26,7 @@ public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
     }
 
     // Example: Get all products (with pagination)
-    public async Task<PagedResponse> GetAllProductsAsync(int page, int count, string search = null,
+    public async Task<PagedResponse> GetAllAssetsAsync(int page, int count, string search = null,
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/asset/all?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}");
@@ -43,7 +43,7 @@ public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
     }
 
     // Example: Create or update a product
-    public async Task<Asset> CreateOrUpdateProductAsync(Asset asset, string apiVersion = null)
+    public async Task<Asset> CreateOrUpdateAssetAsync(Asset asset, string apiVersion = null)
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/asset")
         {
@@ -62,7 +62,7 @@ public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
     }
 
     // Example: Delete a product by ID
-    public async Task DeleteProductByIdAsync(long assetId, string apiVersion = null)
+    public async Task DeleteAssetByIdAsync(long assetId, string apiVersion = null)
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/asset/{assetId}");
 
@@ -73,7 +73,7 @@ public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<HttpResponseMessage> CreateProductAsync(CreateAsset createAsset, string apiVersion)
+    public async Task<HttpResponseMessage> CreateAssetAsync(CreateAsset createAsset, string apiVersion)
     {
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/asset/wizard")
         {

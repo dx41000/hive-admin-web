@@ -8,4 +8,6 @@ public interface IProductVariantService
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0");
 
     Task<AssetVariant> GetProductVariantAsync(long productId, string apiVersion = "1.0");
+
+    Task DeleteProductVariantAsync(long productVariantId, string apiVersion = null);
 }

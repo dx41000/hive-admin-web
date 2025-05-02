@@ -16,4 +16,6 @@ public interface IProductariantViewService
 
     Task<ApiResponse> GetPrintFile(GenerateImageRequest generateImageRequest,
         string apiVersion = "1.0");
+    
+    Task DeleteProductVariantViewAsync(long productVariantViewId, string apiVersion = null);
 }
