@@ -51,7 +51,15 @@
     <MudTh>
       @if (context.Asset.ProductType == (int)ProductType.POD)
       {
-        <MudImage Src="@GetImage(context)" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+        <MudTh>
+          @{
+            var imageSrc = GetImage(context);
+          }
+          @if (!string.IsNullOrEmpty(imageSrc))
+          {
+            <MudImage Src="@imageSrc" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+          }
+        </MudTh>
       }
     </MudTh>
     <MudTh>

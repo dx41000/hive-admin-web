@@ -48,7 +48,7 @@ namespace hive_admin_web.Services
 
             var storeId = appState.StoreId;
             
-            var url = $"api/productvariantview";
+            var url = $"api/productvariantview/{storeId}";
             var content = new StringContent(JsonConvert.SerializeObject(productVariantView), Encoding.UTF8,
                 "application/json");
 
@@ -94,7 +94,8 @@ namespace hive_admin_web.Services
         public async Task<ApiResponse> GetPrintFile(GenerateImageRequest generateImageRequest,
             string apiVersion = "1.0")
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/printready/GenerateImage/")
+            
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/printready/GenerateImage/")
             {
                 Content = new StringContent(JsonConvert.SerializeObject(generateImageRequest),
                     System.Text.Encoding.UTF8, "application/json")

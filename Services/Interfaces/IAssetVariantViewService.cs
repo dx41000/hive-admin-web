@@ -15,5 +15,5 @@ public interface IAssetVariantViewService
 
     Task<AssetVariantView> CreateAssetVariantViewAsync(AssetVariantView assetVariantView, string apiVersion = "1.0");
     Task<AssetVariantView> UpdateAssetVariantViewAsync(AssetVariantView assetVariantView, string apiVersion = "1.0");
-    Task UpdateAllAssetVariantViewsAsync(string apiVersion = "1.0");
+    Task<AssetVariantView>  UpdateAllAssetVariantViewsAsync(AssetVariantView assetVariantView, string apiVersion = "1.0");
 }

@@ -37,13 +37,22 @@
     <MudTh>
 
     </MudTh>
+    <MudTh>
+
+    </MudTh>
   </HeaderContent>
   <RowTemplate>
     <MudTd>@context.Name</MudTd>
     <MudTd>@context.OutputWidth</MudTd>
     <MudTd>@context.OutputHeight</MudTd>
     <MudTh>
-      <MudImage Src="@GetImage(context)" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+      @{
+        var imageSrc = GetImage(context);
+      }
+      @if (!string.IsNullOrEmpty(imageSrc))
+      {
+        <MudImage Src="@imageSrc" Alt="Print File" Elevation="25" Class="rounded-lg"/>
+      }
     </MudTh>
     <MudTd>
       @if (context?.AssetVariant?.Asset?.ProductType == (int)ProductType.POD)
@@ -62,6 +71,11 @@
           </ActivatorContent>
         </MudFileUpload>
       }
+    </MudTd>
+    <MudTd>
+      <MudButton @onclick="() => UpdateAllAssetVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
+        Update all views
+      </MudButton>
     </MudTd>
     <MudTd>
       <MudButton @onclick="() => DeleteAssetVariantView(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
@@ -93,6 +107,7 @@
   IList<IBrowserFile> _files = new List<IBrowserFile>();
   
   private long selectAssetVariantViewId;
+  AssetVariantView selectedAssetVariantView;
 
   string GetImage(AssetVariantView assetVariantView)
   {
@@ -222,6 +237,31 @@
 
     var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small };
     await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+  }
+  
+  private async Task UpdateAllAssetVariantViews(AssetVariantView assetVariantView)
+  {
+    selectedAssetVariantView = assetVariantView;
+    var parameters = new DialogParameters
+    {
+      { "Title", "Update All Asset Variant View ?" },
+      { "MainText", "Are you sure you want to all related asset views to match this item?" },
+      { "OnYes", EventCallback.Factory.Create(this, YesActionUpdateAllAssetVariantViews) },
+      { "OnNo", EventCallback.Factory.Create(this, NoAction) }
+    };
+
+    var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small };
+    await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+  }
+  
+  private async Task YesActionUpdateAllAssetVariantViews()
+  {
+    _isLoading = true;
+    //overlayVisible = true;
+    await AssetVariantViewService.UpdateAllAssetVariantViewsAsync(selectedAssetVariantView);
+    //overlayVisible = false;
+    _isLoading = false;
+    await table.ReloadServerData();
   }
   
   private async Task YesActionDeleteAssetVariant()

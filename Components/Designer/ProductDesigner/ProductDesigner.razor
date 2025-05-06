@@ -477,13 +477,13 @@
     
     var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
-      ProductVariantDraftId = (long)ProductVariantView.ProductVariantId,
+      ProductVariantId = (long)ProductVariantView.ProductVariantId,
       ProductType = (int)ProductType.POD,
       GenerateImages = new List<GenerateImage>
       {
         new()
         {
-          ProductVariantViewDraftId = (long)ProductVariantView.Id
+          ProductVariantViewId = (long)ProductVariantView.Id
         }
       }
     });

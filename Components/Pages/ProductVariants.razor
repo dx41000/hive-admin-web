@@ -140,7 +140,7 @@ TestPrintFile
     
     var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
-      ProductVariantDraftId = (long)productVariant.Id,
+      ProductVariantId = (long)productVariant.Id,
       ProductType = (int)productVariant.AssetVariant.Asset.ProductType,
       GenerateImages = []
     });

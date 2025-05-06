@@ -132,15 +132,22 @@ namespace hive_admin_web.Services
         }
 
         // PUT request for /api/productvariantview/allVariants
-        public async Task UpdateAllAssetVariantViewsAsync(string apiVersion = "1.0")
+        public async Task<AssetVariantView> UpdateAllAssetVariantViewsAsync(AssetVariantView assetVariantView, string apiVersion = "1.0")
         {
             SetDefaultHeaders(apiVersion);
 
             var url = "api/assetvariantview/allVariants";
-            var response = await _httpClient.PutAsync(url, null);
-            if (!response.IsSuccessStatusCode)
+            var content = new StringContent(JsonConvert.SerializeObject(assetVariantView), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await _httpClient.PutAsync(url, content);
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception($"Error updating all asset variant views: {response.StatusCode}");
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<AssetVariantView>(jsonResponse);
+            }
+            else
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error updating asset variant view: {response.StatusCode}");
             }
         }
     }
