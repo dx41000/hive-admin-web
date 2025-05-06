@@ -61,7 +61,9 @@
       }
     </MudTd>
     <MudTd>
-      <MudButton @onclick="() => CopyDesign(context)" Variant="Variant.Filled" Color="Color.Primary">Apply To All Views</MudButton>
+      <MudButton @onclick="() => UpdateAllProductVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
+        Update all views
+      </MudButton>
     </MudTd>
     <MudTd>
       <MudButton @onclick="() => DeleteProductVariant(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
@@ -90,6 +92,7 @@
   private List<BreadcrumbItem> _items;
   private bool overlayVisible;
   private long selectedProductVariantViewId;
+  private ProductVariantView selectedProductVariantView;
   
   protected override async Task OnInitializedAsync()
   {
@@ -180,15 +183,29 @@
     });
   }
 
-  private async Task CopyDesign(ProductVariantView productVariantView)
+  private async Task UpdateAllProductVariantViews(ProductVariantView productVariantView)
+  {
+    selectedProductVariantView = productVariantView;
+    var parameters = new DialogParameters
+    {
+      { "Title", "Update All Product Variant Views ?" },
+      { "MainText", "Are you sure you want to all related product views to match this item?" },
+      { "OnYes", EventCallback.Factory.Create(this, YesActionUpdateAllProductVariantViews) },
+      { "OnNo", EventCallback.Factory.Create(this, NoAction) }
+    };
+
+    var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small };
+    await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+  }
+  
+  private async Task YesActionUpdateAllProductVariantViews()
   {
     _isLoading = true;
     overlayVisible = true;
-    var response = await ProductariantViewService.CopyDesign(productVariantView);
+    var response = await ProductariantViewService.CopyDesign(selectedProductVariantView);
     
     overlayVisible = false;
     _isLoading = false;
-
   }
   
   
