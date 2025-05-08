@@ -151,7 +151,7 @@
   private async Task<TableData<ProductVariantView>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await ProductariantViewService.GetAllProductDrafVariantViewsByIdAsync(long.Parse(productDraftVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await ProductariantViewService.GetAllProductVariantViewsByIdAsync(long.Parse(productDraftVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
     _isLoading = false;

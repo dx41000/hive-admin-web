@@ -20,3 +20,33 @@ body {
 	font-size: 25px !important;
 	line-height: 26px !important;
 }
+
+/*ShopfiyTest*/
+.container {
+	display: flex;
+	width: 100%;
+}
+
+.left-container {
+	position: relative;
+	padding-bottom: 56.25%;
+	height: 0;
+	overflow: hidden;
+	max-width: 800px;
+	width: 800px;
+}
+
+.right-container {
+	flex: 1;
+	text-align: left;
+	padding-left: 20px;
+}
+
+iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	max-width: 800px;
+	width: 800px;
+	height: 100%;
+}

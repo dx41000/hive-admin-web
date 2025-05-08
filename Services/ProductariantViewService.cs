@@ -20,7 +20,7 @@ namespace hive_admin_web.Services
             _httpClient.DefaultRequestHeaders.Add("api-version", apiVersion);
         }
 
-        public async Task<PagedResponse> GetAllProductDrafVariantViewsByIdAsync(long productVariantViewId,int page = 1, int count = 10, string search = null,
+        public async Task<PagedResponse> GetAllProductVariantViewsByIdAsync(long productVariantViewId,int page = 1, int count = 10, string search = null,
             string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")
         {
             SetDefaultHeaders(apiVersion);

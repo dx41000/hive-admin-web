@@ -55,6 +55,12 @@
       }
     </MudTd>
     <MudTd>
+      @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD)
+      {
+        <MudButton @onclick="() => TestShopify(context)" Variant="Variant.Filled" Color="Color.Primary">Test Shopify</MudButton>
+      }
+    </MudTd>
+    <MudTd>
       <MudButton @onclick="() => DeleteProductVariant(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
         Delete
       </MudButton>
@@ -132,6 +138,16 @@ TestPrintFile
     _searchString = text;
     table.ReloadServerData();
   }
+  
+  private async Task TestShopify(ProductVariant productVariant)
+  {
+    _isLoading = true;
+    overlayVisible = true;
+    NavigationManager.NavigateTo("/shopifytest/" + productVariant.Id);
+    overlayVisible = false;
+    _isLoading = false;
+  }
+  
   
   private async Task TestPrintFile(ProductVariant productVariant)
   {

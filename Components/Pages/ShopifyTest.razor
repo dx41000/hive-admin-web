@@ -1,0 +1,66 @@
+﻿@page "/shopifyTest/{productVariantId}"
+@using hive_admin_web.Models
+@using hive_admin_web.Models.AppSettings
+@using hive_admin_web.Services.Interfaces
+@using Newtonsoft.Json
+@inject IJSRuntime JS
+@inject Config config
+@inject IProductariantViewService ProductariantViewService;
+
+<h1>Shopify Test Page</h1>
+<br/>
+<br/>
+<div class="container">
+  <div class="left-container">
+    <iframe id="myIframe" src="singleview.html" frameborder="1"></iframe>
+  </div>
+  <div class="right-container">
+
+    <MudButton @onclick="ShowNextView" Variant="Variant.Filled" Color="Color.Primary">
+      Show Next View
+    </MudButton>
+    
+    <br/><br/>
+    <div id="elements">
+    </div>
+  </div>
+</div>
+
+@code {
+  [Parameter] public string ProductVariantId { get; set; }
+  private long _currentView;
+  List<ProductVariantView> _productVariantViews;
+
+  private async Task ShowNextView()
+  {
+    Console.WriteLine($"show next view - {_currentView}");
+    await JS.InvokeVoidAsync("postToIframe", "processViews",   new {
+      viewUrl = $"{config.BaseUrl}/api/productvariantview/{_currentView}"
+    });
+
+    _currentView++;
+    if (_currentView > _productVariantViews.Last().Id)
+    {
+      _currentView = (long)_productVariantViews.First().Id;
+    }
+  }
+
+  private async Task SaveDesign()
+  {
+    await JS.InvokeVoidAsync("postToIframe", "saveDesign", null);
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      await JS.InvokeVoidAsync("initializePostMessageHandler");
+      
+      var response = await ProductariantViewService.GetAllProductVariantViewsByIdAsync(long.Parse(ProductVariantId));
+      var json = response.Data.Payload.ToString();
+      _productVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
+      _currentView = (long)_productVariantViews.First().Id;
+      await ShowNextView();
+    }
+  }
+}
