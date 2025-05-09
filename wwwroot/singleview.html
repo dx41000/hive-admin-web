@@ -152,6 +152,9 @@
     window.addEventListener("message", (e) => {
         var data = e.data;
         if (data.action === "processViews") {
+            
+            console.log("processViews");
+            
             let options = {
                 // productsJSON: 'https://localhost:7026/api/shopify/proxy/getview?productVariantViewId=4', //see JSON folder for products sorted in categories
                 designsJSON: './json/designs.json', //see JSON folder for designs sorted in categories

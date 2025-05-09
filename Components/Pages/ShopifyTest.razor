@@ -12,7 +12,7 @@
 <br/>
 <div class="container">
   <div class="left-container">
-    <iframe id="myIframe" src="singleview.html" frameborder="1"></iframe>
+    <iframe @key="myIframe" id="myIframe" src="singleview.html" frameborder="1"></iframe>
   </div>
   <div class="right-container">
 
@@ -28,21 +28,31 @@
 
 @code {
   [Parameter] public string ProductVariantId { get; set; }
-  private long _currentView;
+  private int _currentView;
   List<ProductVariantView> _productVariantViews;
-
+  private Guid myIframe = Guid.NewGuid();
   private async Task ShowNextView()
   {
-    Console.WriteLine($"show next view - {_currentView}");
-    await JS.InvokeVoidAsync("postToIframe", "processViews",   new {
-      viewUrl = $"{config.BaseUrl}/api/productvariantview/{_currentView}"
-    });
-
-    _currentView++;
-    if (_currentView > _productVariantViews.Last().Id)
+    //GetProductData
+    
+    if (_currentView >= _productVariantViews.Count-1)
     {
-      _currentView = (long)_productVariantViews.First().Id;
+      _currentView = 0;
     }
+    else
+    {
+      _currentView++;
+    }
+    
+    RefreshIframe();
+    await InitaliseDesigner();
+    await LoadProduct();
+    
+  }
+
+  private void RefreshIframe()
+  {
+    myIframe = Guid.NewGuid();
   }
 
   private async Task SaveDesign()
@@ -54,13 +64,26 @@
   {
     if (firstRender)
     {
-      await JS.InvokeVoidAsync("initializePostMessageHandler");
-      
-      var response = await ProductariantViewService.GetAllProductVariantViewsByIdAsync(long.Parse(ProductVariantId));
-      var json = response.Data.Payload.ToString();
-      _productVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
-      _currentView = (long)_productVariantViews.First().Id;
-      await ShowNextView();
+      _currentView = 0;
+      await InitaliseDesigner();
+      await LoadProduct();
     }
+  }
+
+  private async Task InitaliseDesigner()
+  {
+    await JS.InvokeVoidAsync("initializePostMessageHandler");
+
+    var response = await ProductariantViewService.GetAllProductVariantViewsByIdAsync(long.Parse(ProductVariantId));
+    var json = response.Data.Payload.ToString();
+    _productVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
+  }
+
+  private async Task LoadProduct()
+  {
+    Console.WriteLine($"show next view - {_currentView}");
+    await JS.InvokeVoidAsync("postToIframe", "processViews",   new {
+      viewUrl = $"{config.BaseUrl}/api/productvariantview/{_productVariantViews[_currentView].Id}",
+    });
   }
 }
