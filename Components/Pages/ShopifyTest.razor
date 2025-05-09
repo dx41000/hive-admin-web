@@ -1,6 +1,7 @@
 ﻿@page "/shopifyTest/{productVariantId}"
 @using hive_admin_web.Models
 @using hive_admin_web.Models.AppSettings
+@using hive_admin_web.Models.JS
 @using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @inject IJSRuntime JS
@@ -19,6 +20,10 @@
     <MudButton @onclick="ShowNextView" Variant="Variant.Filled" Color="Color.Primary">
       Show Next View
     </MudButton>
+
+    <MudButton @onclick="GetProductAndPrintOrderData" Variant="Variant.Filled" Color="Color.Primary">
+      Get Product
+    </MudButton>
     
     <br/><br/>
     <div id="elements">
@@ -31,6 +36,15 @@
   private int _currentView;
   List<ProductVariantView> _productVariantViews;
   private Guid myIframe = Guid.NewGuid();
+  private DotNetObjectReference<ShopifyTest>? dotNetRef;
+  
+  protected override async Task OnInitializedAsync()
+  {
+    dotNetRef = DotNetObjectReference.Create(this);
+    await JS.InvokeVoidAsync("setupDotNetRef", dotNetRef);
+
+  }
+
   private async Task ShowNextView()
   {
     //GetProductData
@@ -86,4 +100,28 @@
       viewUrl = $"{config.BaseUrl}/api/productvariantview/{_productVariantViews[_currentView].Id}",
     });
   }
+
+  private async Task GetProductAndPrintOrderData()
+  {
+    await JS.InvokeVoidAsync("postToIframe", "getProductAndPrintOrderData",null);
+  }
+  
+  [JSInvokable]
+  public async Task ReturnProductAndPrintOrderData(string json)
+  {
+    var payload = JsonConvert.DeserializeObject<DesignerPayload>(json);
+    _productVariantViews[_currentView].DesignerJson = designerTemplae.Replace("**product**", payload.product);
+    _productVariantViews[_currentView].PrintOrder = payload.printOrderData;
+    Console.WriteLine(json);
+  }
+  
+  string designerTemplae = @"[
+  {
+    ""category"": ""Product Category One"",
+    ""products"": [
+      **product**
+    ]
+  }
+]";
+  
 }

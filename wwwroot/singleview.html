@@ -283,8 +283,25 @@
                 let element = myDesigner.getElementByID(data.payload.id);
                 myDesigner.setElementParameters(JSON.parse(JSON.stringify(data.payload)), element);
             }
-
         }
+
+        if (data.action == "getProductAndPrintOrderData") {
+            var printOrderData = myDesigner.getPrintOrderData();
+            var product = myDesigner.getProduct();
+            
+            var payload = {
+                "printOrderData" : JSON.stringify(printOrderData),
+                "product" : JSON.stringify(product)
+            }
+            
+            message = {
+                action: "returnProductAndPrintOrderData",
+                payload: payload
+            };
+            parentWindow.postMessage(message, "*");
+            
+        }
+
 
     });
 </script>

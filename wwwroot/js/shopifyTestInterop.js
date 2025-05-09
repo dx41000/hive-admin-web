@@ -1,3 +1,10 @@
+let dotNetRef;
+
+
+function setupDotNetRef(ref) {
+    dotNetRef = ref;
+}
+
 window.initializePostMessageHandler = () => {
     let payload = [];
 
@@ -14,6 +21,15 @@ window.initializePostMessageHandler = () => {
             });
             returnElements();
         }
+
+        if (event.data.action === "returnProductAndPrintOrderData") {
+            console.log("returnProductAndPrintOrderData");
+            console.log( JSON.stringify(event.data.payload));
+            callBlazorMethod(event.data.payload);
+            
+        }
+
+        
         
         if (event.data.action === "returnPrintOrderData") {
             console.log("returnPrintOrderData RECEIVED FROM CHILD");
@@ -41,6 +57,21 @@ window.initializePostMessageHandler = () => {
         console.log("Message from iframe:", event.data);
     });
 
+    function callBlazorMethod(payload) {
+        try {
+            dotNetRef.invokeMethodAsync('ReturnProductAndPrintOrderData', JSON.stringify(payload))
+                .then(result => {
+                    console.log('Method called successfully');
+                })
+                .catch(error => {
+                    console.error('Error calling method:', error);
+                });
+        }
+        catch (error) {
+            console.error('Error calling Blazor function:', error);
+        }
+    }
+    
     function addTextbox(labelText, textboxText) {
         const container = document.getElementById('elements');
         const wrapperDiv = document.createElement('div');
