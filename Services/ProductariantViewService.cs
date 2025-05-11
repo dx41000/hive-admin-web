@@ -20,6 +20,26 @@ namespace hive_admin_web.Services
             _httpClient.DefaultRequestHeaders.Add("api-version", apiVersion);
         }
 
+        public async Task<ApiResponse> GetAsync(long productVariantViewId, string apiVersion = "1.0")
+        {
+            SetDefaultHeaders(apiVersion);
+
+            var storeId = appState.StoreId;
+            var url = $"api/productvariantview/{productVariantViewId}/{storeId}";
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<ApiResponse>(jsonResponse);
+            }
+            else
+            {
+                throw new Exception($"Error fetching product variant views: {response.StatusCode}");
+            }
+        }
+
         public async Task<PagedResponse> GetAllProductVariantViewsByIdAsync(long productVariantViewId,int page = 1, int count = 10, string search = null,
             string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")
         {

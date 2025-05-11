@@ -7,25 +7,83 @@
 @inject IJSRuntime JS
 @inject Config config
 @inject IProductariantViewService ProductariantViewService;
+@inject NavigationManager Navigation
+@inject AppState AppState
+
+<style>
+
+  /*ShopfiyTest*/
+  /*.container {*/
+  /*  display: flex;*/
+  /*  width: 100%;*/
+  /*}*/
+  
+  /*.left-container {*/
+  /*  position: relative;*/
+  /*  padding-bottom: 56.25%;*/
+  /*  height: 0;*/
+  /*  overflow: hidden;*/
+  /*  max-width: 800px;*/
+  /*  width: 800px;*/
+  /*}*/
+  
+  .right-container {
+    flex: 1;
+    text-align: left;
+    padding-left: 20px;
+  }
+  
+  /*iframe {*/
+  /*  position: absolute;*/
+  /*  top: 0;*/
+  /*  left: 0;*/
+  /*  max-width: 800px;*/
+  /*  width: 800px;*/
+  /*  height: 100%;*/
+  /*}*/
+
+  .container {
+    display: flex;
+    width: 100%;
+  }
+
+  .left-container {
+    flex: 1;
+    position: relative;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  
+</style>
 
 <h1>Shopify Test Page</h1>
 <br/>
 <br/>
 <div class="container">
   <div class="left-container">
-    <iframe @key="myIframe" id="myIframe" src="singleview.html" frameborder="1"></iframe>
+    <iframe id="myIframe" src="@currentUrl" frameborder="1"></iframe>
   </div>
   <div class="right-container">
+
 
     <MudButton @onclick="ShowNextView" Variant="Variant.Filled" Color="Color.Primary">
       Show Next View
     </MudButton>
-
+    <br/><br/>
     <MudButton @onclick="GetProductAndPrintOrderData" Variant="Variant.Filled" Color="Color.Primary">
-      Get Product
+      Save View
+    </MudButton>
+    <br/><br/>
+    <MudButton @onclick="CreatePrintFile" Variant="Variant.Filled" Color="Color.Primary">
+      Create Print File
     </MudButton>
     
     <br/><br/>
+    <label>View Name: @viewName</label>
     <div id="elements">
     </div>
   </div>
@@ -34,22 +92,25 @@
 @code {
   [Parameter] public string ProductVariantId { get; set; }
   private int _currentView;
-  List<ProductVariantView> _productVariantViews;
-  private Guid myIframe = Guid.NewGuid();
+  //private Guid myIframe = Guid.NewGuid();
   private DotNetObjectReference<ShopifyTest>? dotNetRef;
+  //private bool _firstRender = true;
+  private string currentUrl = string.Empty;
+  private string viewName = string.Empty;
   
   protected override async Task OnInitializedAsync()
   {
     dotNetRef = DotNetObjectReference.Create(this);
     await JS.InvokeVoidAsync("setupDotNetRef", dotNetRef);
-
+    _currentView = 0;
+    await InitaliseDesigner();
+    await GetProductVariantViewsFromDb();
+    await ShowProduct();
   }
 
   private async Task ShowNextView()
   {
-    //GetProductData
-    
-    if (_currentView >= _productVariantViews.Count-1)
+    if (_currentView >= AppState.TestProductVariantViews.Count-1)
     {
       _currentView = 0;
     }
@@ -57,16 +118,8 @@
     {
       _currentView++;
     }
-    
-    RefreshIframe();
-    await InitaliseDesigner();
-    await LoadProduct();
-    
-  }
 
-  private void RefreshIframe()
-  {
-    myIframe = Guid.NewGuid();
+    await ShowProduct();
   }
 
   private async Task SaveDesign()
@@ -74,31 +127,29 @@
     await JS.InvokeVoidAsync("postToIframe", "saveDesign", null);
   }
 
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (firstRender)
-    {
-      _currentView = 0;
-      await InitaliseDesigner();
-      await LoadProduct();
-    }
-  }
-
   private async Task InitaliseDesigner()
   {
     await JS.InvokeVoidAsync("initializePostMessageHandler");
-
-    var response = await ProductariantViewService.GetAllProductVariantViewsByIdAsync(long.Parse(ProductVariantId));
-    var json = response.Data.Payload.ToString();
-    _productVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
   }
 
-  private async Task LoadProduct()
+  private async Task GetProductVariantViewsFromDb()
   {
-    Console.WriteLine($"show next view - {_currentView}");
-    await JS.InvokeVoidAsync("postToIframe", "processViews",   new {
-      viewUrl = $"{config.BaseUrl}/api/productvariantview/{_productVariantViews[_currentView].Id}",
-    });
+    var response = await ProductariantViewService.GetAllProductVariantViewsByIdAsync(long.Parse(ProductVariantId));
+    var json = response.Data.Payload.ToString();
+    AppState.TestProductVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
+  }
+
+  private async Task ShowProduct()
+  {
+    viewName = AppState.TestProductVariantViews[_currentView].Name;
+    var uri = new Uri(Navigation.Uri);
+    currentUrl = "singleview.html?viewUrl=" + Uri.EscapeDataString( $"{uri.Scheme}://{uri.Host}:{uri.Port}/api/views/{AppState.TestProductVariantViews[_currentView].Id}");
+
+    var height = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasHeight;
+    var width = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasWidth;
+    
+    await JS.InvokeVoidAsync("resizeIframe", "myIframe", width, height); // Example dimensions
+
   }
 
   private async Task GetProductAndPrintOrderData()
@@ -106,15 +157,19 @@
     await JS.InvokeVoidAsync("postToIframe", "getProductAndPrintOrderData",null);
   }
   
+  private async Task CreatePrintFile()
+  {
+    await JS.InvokeVoidAsync("postToIframe", "createPrintFile",null);
+  }
+  
   [JSInvokable]
   public async Task ReturnProductAndPrintOrderData(string json)
   {
     var payload = JsonConvert.DeserializeObject<DesignerPayload>(json);
-    _productVariantViews[_currentView].DesignerJson = designerTemplae.Replace("**product**", payload.product);
-    _productVariantViews[_currentView].PrintOrder = payload.printOrderData;
-    Console.WriteLine(json);
+    AppState.TestProductVariantViews[_currentView].DesignerJson = designerTemplae.Replace("**product**", payload.product);
+    AppState.TestProductVariantViews[_currentView].PrintOrder = payload.printOrderData;
   }
-  
+
   string designerTemplae = @"[
   {
     ""category"": ""Product Category One"",

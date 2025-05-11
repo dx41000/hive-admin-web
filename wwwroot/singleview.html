@@ -149,11 +149,129 @@
 
     var parentWindow = window.parent;
 
+
+
+
+    let options = {
+        // productsJSON: 'https://localhost:7026/api/shopify/proxy/getview?productVariantViewId=4', //see JSON folder for products sorted in categories
+        designsJSON: './json/designs.json', //see JSON folder for designs sorted in categories
+        stageWidth: 1200,
+        editorMode: false,
+        smartGuides: true,
+        //uiTheme: 'doyle',
+        fonts: [
+            {name: 'Helvetica'},
+            {name: 'Times New Roman'},
+            {name: 'Verdana'},
+            {name: 'Tahoma'},
+            {name: 'Trebuchet'},
+            {name: 'Georgia'},
+            {name: 'Courier New'},
+            // {name: 'Brush Script MT'},
+            {name: 'pacificoregular', url: 'fonts/pacificoregular.ttf'},
+            {name: 'Arial'},
+            {name: 'Lobster', url: 'fonts/Lobster.ttf'},
+            {name: 'Nurom-Bold', url: 'fonts/Nurom-Bold.ttf'}
+        ],
+        customTextParameters: {
+            colors: false,
+            removable: true,
+            resizable: true,
+            draggable: true,
+            rotatable: false,
+            autoCenter: true,
+            boundingBox: "Base",
+            curvable: true
+        },
+        customImageParameters: {
+            draggable: true,
+            removable: true,
+            resizable: true,
+            rotatable: false,
+            colors: '#000',
+            autoCenter: true,
+            boundingBox: "Base"
+        },
+        actions: {},
+        mainBarModules: []
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const viewUrl = params.get("viewUrl");
+
+    var path = viewUrl
+
+    var $fpd = $('#clothing-designer');
+    var pluginOpts = options;
+    var yourDesigner = new FancyProductDesigner($fpd, pluginOpts);
+    myDesigner = yourDesigner;
+    $('#clothing-designer').on('ready', readyHandler);
+    $('#clothing-designer').show();
+
+    function readyHandler() {
+        //setTimeout(function () {
+        var views = [];
+        var view = [];
+        $.ajax({
+            url: path,
+            async: false,
+            dataType: 'json',
+            cache: false,
+            success: function (json) {
+                view = json[0].products[0];
+            },
+            error: function (request, status, error) {
+                console.log(request);
+                console.log(status);
+                console.log(error);
+            }
+        });
+
+        views.push(view[0]);
+        myDesigner.loadProduct(views, false, false);
+        let elementList = [];
+        let getElements = myDesigner.getElements();
+        let getProduct = myDesigner.getProduct();
+        let viewName = myDesigner.getProduct()[0].title;
+
+        getElements.forEach(element => {
+            if (
+                element.selectable === true &&
+                element.originParams.type === "i-text"
+            ) {
+                elementList.push({
+                    id: element.id,
+                    text: element.text,
+                    title: element.title,
+                    designerIndex: 1,
+                    viewName: viewName
+                });
+            }
+
+        });
+
+        message = {
+            action: "returnElements",
+            payload: elementList
+        };
+        parentWindow.postMessage(message, "*");
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     window.addEventListener("message", (e) => {
         var data = e.data;
         if (data.action === "processViews") {
             
-            console.log("processViews");
             
             let options = {
                 // productsJSON: 'https://localhost:7026/api/shopify/proxy/getview?productVariantViewId=4', //see JSON folder for products sorted in categories
@@ -219,8 +337,6 @@
                     cache: false,
                     success: function (json) {
                         view = json[0].products[0];
-                        console.log("success");
-                        console.log(view);
                     },
                     error: function (request, status, error) {
                         console.log(request);
@@ -237,7 +353,6 @@
                 let viewName = myDesigner.getProduct()[0].title;
 
                 getElements.forEach(element => {
-                    console.log(element);
                     if (
                         element.selectable === true &&
                         element.originParams.type === "i-text"
@@ -304,6 +419,8 @@
 
 
     });
+
+ 
 </script>
 
 </body>

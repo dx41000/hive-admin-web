@@ -60,6 +60,8 @@ public class Startup(IConfiguration configuration)
         // Add Razor components
         services.AddRazorComponents()
             .AddInteractiveServerComponents();
+        
+        services.AddControllers(); 
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -91,6 +93,8 @@ public class Startup(IConfiguration configuration)
             {
                 await context.Response.WriteAsync("Healthy");
             });
+            
+            endpoints.MapControllers();
         });
     }
 }

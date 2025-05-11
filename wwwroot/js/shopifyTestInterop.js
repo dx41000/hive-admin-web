@@ -7,7 +7,7 @@ function setupDotNetRef(ref) {
 
 window.initializePostMessageHandler = () => {
     let payload = [];
-
+    
     window.addEventListener("message", function (event) {
         if (event.origin !== "https://localhost:7183") {
             console.log("Received message from untrusted origin:", event.origin);
@@ -23,16 +23,10 @@ window.initializePostMessageHandler = () => {
         }
 
         if (event.data.action === "returnProductAndPrintOrderData") {
-            console.log("returnProductAndPrintOrderData");
-            console.log( JSON.stringify(event.data.payload));
             callBlazorMethod(event.data.payload);
-            
         }
-
-        
         
         if (event.data.action === "returnPrintOrderData") {
-            console.log("returnPrintOrderData RECEIVED FROM CHILD");
             event.data.payload.custom_images = [];
 
             const dataPayload = event.data.payload;
@@ -54,14 +48,13 @@ window.initializePostMessageHandler = () => {
                 });
         }
 
-        console.log("Message from iframe:", event.data);
     });
 
     function callBlazorMethod(payload) {
         try {
             dotNetRef.invokeMethodAsync('ReturnProductAndPrintOrderData', JSON.stringify(payload))
                 .then(result => {
-                    console.log('Method called successfully');
+         
                 })
                 .catch(error => {
                     console.error('Error calling method:', error);
@@ -90,13 +83,12 @@ window.initializePostMessageHandler = () => {
     }
 
     function returnElements() {
-        console.log('returnElements');
         var iframe = document.getElementById("myIframe");
         let customiseHtml = '';
 
         for (let index = 0; index < payload.length; index++) {
             const element = payload[index];
-            customiseHtml += GenerateTextbox(element.id, element.designerIndex, element.viewName, element.text);
+            customiseHtml += GenerateTextbox(element.id, element.designerIndex, element.text);
         }
 
         document.getElementById('elements').innerHTML = customiseHtml;
@@ -123,9 +115,8 @@ window.initializePostMessageHandler = () => {
         });
     }
 
-    function GenerateTextbox(id, index, viewName, value) {
-        return `<label>id: ${id}; viewName: ${viewName}</label>
-                <input id="txtElementUpdate" name="${id}" data-id="${id}" data-index="${index}" onClick="this.setSelectionRange(0, this.value.length)" type="text" value="${value}" /> `;
+    function GenerateTextbox(id, index, value) {
+        return `<input id="txtElementUpdate" name="${id}" data-id="${id}" data-index="${index}" onClick="this.setSelectionRange(0, this.value.length)" type="text" value="${value}" /> </br></br>`;
     }
 };
 
@@ -134,3 +125,11 @@ window.postToIframe = (action, payload) => {
     const message = { action: action, payload: payload };
     iframe.contentWindow.postMessage(message, "*");
 };
+
+function resizeIframe(iframeId, width, height) {
+    const iframe = document.getElementById(iframeId);
+    if (iframe) {
+        iframe.style.width = width + "px";
+        iframe.style.height = height + "px";
+    }
+}
