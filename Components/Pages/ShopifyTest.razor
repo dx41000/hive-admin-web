@@ -38,6 +38,10 @@
   
 </style>
 
+<MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
+  <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
 <h1>Shopify Test Page</h1>
 <br/>
 <br/>
@@ -46,8 +50,6 @@
     <iframe id="myIframe" src="@currentUrl" frameborder="1"></iframe>
   </div>
   <div class="right-container">
-
-
     <MudButton @onclick="ShowNextView" Variant="Variant.Filled" Color="Color.Primary">
       Show Next View
     </MudButton>
@@ -75,7 +77,8 @@
   //private bool _firstRender = true;
   private string currentUrl = string.Empty;
   private string viewName = string.Empty;
-  private string productVariantName = string.Empty;
+  private bool overlayVisible;
+  private bool _isLoading;
   
   protected override async Task OnInitializedAsync()
   {
@@ -138,7 +141,8 @@
   
   private async Task CreatePrintFile()
   {
-
+    _isLoading = true;
+    overlayVisible = true;
     var request = new GenerateImageRequest
     {
       ProductVariantId = long.Parse(ProductVariantId),
@@ -167,6 +171,9 @@
         
       // Trigger the download using JS interop
       await JSRuntimeExtensions.InvokeVoidAsync(JS, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+      
+      _isLoading = false;
+      overlayVisible = false;
     }
   }
   
