@@ -9,7 +9,8 @@ window.initializePostMessageHandler = () => {
     let payload = [];
     
     window.addEventListener("message", function (event) {
-        if (event.origin !== "https://localhost:7183") {
+        if (event.origin !== "https://localhost:7183" &&
+        event.origin !== "http://hive-core-alb-production-1562672820.eu-west-2.elb.amazonaws.com:49160") {
             console.log("Received message from untrusted origin:", event.origin);
             return;
         }
