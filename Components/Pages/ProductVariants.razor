@@ -38,9 +38,6 @@
       Variant 3
     </MudTh>
     <MudTh>
-      Test
-    </MudTh>
-    <MudTh>
 
     </MudTh>
   </HeaderContent>
@@ -48,12 +45,12 @@
     <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.AssetVariant.Option1Type - @context.AssetVariant.Option1</a></MudTd>
     <MudTd>@context.AssetVariant.Option2Type - @context.AssetVariant.Option2</MudTd>
     <MudTd>@context.AssetVariant.Option3Type - @context.AssetVariant.Option3</MudTd>
-    <MudTd>
-      @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD)
-      {
-        <MudButton @onclick="() => TestPrintFile(context)" Variant="Variant.Filled" Color="Color.Primary">Test</MudButton>
-      }
-    </MudTd>
+    @* <MudTd> *@
+    @*   @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD) *@
+    @*   { *@
+    @*     <MudButton @onclick="() => TestPrintFile(context)" Variant="Variant.Filled" Color="Color.Primary">Test</MudButton> *@
+    @*   } *@
+    @* </MudTd> *@
     <MudTd>
       @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD)
       {
@@ -65,7 +62,7 @@
         Delete
       </MudButton>
     </MudTd>
-  </RowTemplate>
+  </RowTemplate>  
   <PagerContent>
     <MudTablePager />
   </PagerContent>

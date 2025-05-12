@@ -1,7 +1,9 @@
 ﻿@page "/shopifyTest/{productVariantId}"
 @using hive_admin_web.Models
 @using hive_admin_web.Models.AppSettings
+@using hive_admin_web.Models.Enum
 @using hive_admin_web.Models.JS
+@using hive_admin_web.Models.PrintReady
 @using hive_admin_web.Services.Interfaces
 @using Newtonsoft.Json
 @inject IJSRuntime JS
@@ -12,35 +14,11 @@
 
 <style>
 
-  /*ShopfiyTest*/
-  /*.container {*/
-  /*  display: flex;*/
-  /*  width: 100%;*/
-  /*}*/
-  
-  /*.left-container {*/
-  /*  position: relative;*/
-  /*  padding-bottom: 56.25%;*/
-  /*  height: 0;*/
-  /*  overflow: hidden;*/
-  /*  max-width: 800px;*/
-  /*  width: 800px;*/
-  /*}*/
-  
   .right-container {
     flex: 1;
     text-align: left;
     padding-left: 20px;
   }
-  
-  /*iframe {*/
-  /*  position: absolute;*/
-  /*  top: 0;*/
-  /*  left: 0;*/
-  /*  max-width: 800px;*/
-  /*  width: 800px;*/
-  /*  height: 100%;*/
-  /*}*/
 
   .container {
     display: flex;
@@ -97,6 +75,7 @@
   //private bool _firstRender = true;
   private string currentUrl = string.Empty;
   private string viewName = string.Empty;
+  private string productVariantName = string.Empty;
   
   protected override async Task OnInitializedAsync()
   {
@@ -159,7 +138,36 @@
   
   private async Task CreatePrintFile()
   {
-    await JS.InvokeVoidAsync("postToIframe", "createPrintFile",null);
+
+    var request = new GenerateImageRequest
+    {
+      ProductVariantId = long.Parse(ProductVariantId),
+      ProductType = (int)ProductType.POD
+    };
+
+    foreach (var testProductVariantViews in AppState.TestProductVariantViews)
+    {
+      request.GenerateImages.Add(new GenerateImage
+      {
+        ProductVariantViewId = (long)testProductVariantViews.Id,
+        PrintOrder = testProductVariantViews.PrintOrder
+      });
+    }
+    
+    var response = await ProductariantViewService.GetPrintFile(request);
+    
+    var json = response.Data.Payload.ToString();
+    var generateImageResponse = JsonConvert.DeserializeObject<GenerateImageResponse>(json);
+    
+    if (generateImageResponse?.PrintFile != null)
+    {
+      // Convert the response byte[] to a file download
+      var fileBytes = generateImageResponse.PrintFile; // Assuming the response has a byte[] called FileBytes
+      var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".pdf"; // Change the file extension/type as per your requirement
+        
+      // Trigger the download using JS interop
+      await JSRuntimeExtensions.InvokeVoidAsync(JS, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+    }
   }
   
   [JSInvokable]
