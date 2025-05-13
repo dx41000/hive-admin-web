@@ -1,4 +1,5 @@
 ﻿@page "/shopifyTest/{productVariantId}"
+@using hive_admin_web.Components.Dialog
 @using hive_admin_web.Models
 @using hive_admin_web.Models.AppSettings
 @using hive_admin_web.Models.Enum
@@ -11,6 +12,7 @@
 @inject IProductariantViewService ProductariantViewService;
 @inject NavigationManager Navigation
 @inject AppState AppState
+@inject IDialogService DialogService
 
 <style>
 
@@ -35,7 +37,23 @@
     height: 100%;
     border: none;
   }
-  
+
+
+
+
+  .button-container {
+    display: flex;
+    justify-content: space-between; /* This makes the buttons go to the far left and right */
+    padding: 10px;
+  }
+
+  .button {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+
 </style>
 
 <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
@@ -48,18 +66,26 @@
 <div class="container">
   <div class="left-container">
     <iframe id="myIframe" src="@currentUrl" frameborder="1"></iframe>
+
+
+
+    <div class="button-container">
+      <button class="button">
+        <MudButton @onclick="GetProductAndPrintOrderData" Variant="Variant.Filled" Color="Color.Primary">
+          Save View
+        </MudButton>
+      </button>
+      <button class="button">
+        <MudButton @onclick="CreatePrintFile" Variant="Variant.Filled" Color="Color.Primary">
+          Create Print File
+        </MudButton>
+      </button>
+    </div>
+    
   </div>
   <div class="right-container">
     <MudButton @onclick="ShowNextView" Variant="Variant.Filled" Color="Color.Primary">
       Show Next View
-    </MudButton>
-    <br/><br/>
-    <MudButton @onclick="GetProductAndPrintOrderData" Variant="Variant.Filled" Color="Color.Primary">
-      Save View
-    </MudButton>
-    <br/><br/>
-    <MudButton @onclick="CreatePrintFile" Variant="Variant.Filled" Color="Color.Primary">
-      Create Print File
     </MudButton>
     
     <br/><br/>
@@ -172,7 +198,9 @@
       var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".pdf"; // Change the file extension/type as per your requirement
         
       // Trigger the download using JS interop
-      await JSRuntimeExtensions.InvokeVoidAsync(JS, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+      //await JSRuntimeExtensions.InvokeVoidAsync(JS, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+
+      OpenImageDialog(fileBytes);
       
       _isLoading = false;
       overlayVisible = false;
@@ -196,4 +224,12 @@
   }
 ]";
   
+  private void OpenImageDialog(byte[] pdfBytes)
+  {
+    var parameters = new DialogParameters();
+    parameters.Add("PdfBytes", pdfBytes);
+    var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    DialogService.Show<PdfDialog>(null, parameters, options);
+  }
+
 }
