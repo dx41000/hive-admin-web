@@ -143,7 +143,7 @@
   {
     _isLoading = true;
     overlayVisible = true;
-    var request = new GenerateImageRequest
+    var request = new GenerateImageRequest(AppState)
     {
       ProductVariantId = long.Parse(ProductVariantId),
       ProductType = (int)ProductType.POD

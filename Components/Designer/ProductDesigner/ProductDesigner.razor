@@ -10,6 +10,7 @@
 @using Newtonsoft.Json.Linq
 @inject IJSRuntime JsRuntime
 @inject IProductariantViewService ProductariantViewService;
+@inject AppState AppState;
 <MudPaper>
   <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
     <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
@@ -475,7 +476,7 @@
   {
     overlayVisible = true;
     
-    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest(AppState)
     {
       ProductVariantId = (long)ProductVariantView.ProductVariantId,
       ProductType = (int)ProductType.POD,

@@ -11,6 +11,7 @@
 @inject IJSRuntime JSRuntime
 @inject IProductVariantService ProductVariantService;
 @inject IProductariantViewService ProductariantViewService;
+@inject AppState AppState;
 <PageTitle>Product Variants</PageTitle>
 
 <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
@@ -151,7 +152,7 @@ TestPrintFile
     _isLoading = true;
     overlayVisible = true;
     
-    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest(AppState)
     {
       ProductVariantId = (long)productVariant.Id,
       ProductType = (int)productVariant.AssetVariant.Asset.ProductType,

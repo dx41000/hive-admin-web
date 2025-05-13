@@ -72,8 +72,6 @@ function addCustomImage(a,b,options,d) {
 window.callOnElementSelect = (dotNetObjectRef, element) => {
   $(element).on('elementSelect', function (event,fabricObject) {
     
-    console.log("elementSelect");
-    console.log(fabricObject);
       if (fabricObject != null) {
         let generalProperties = {
           id: fabricObject.id,
@@ -128,7 +126,7 @@ window.callOnElementSelect = (dotNetObjectRef, element) => {
 };
 
 window.callSetElementParameters = (dotNetObjectRef, id, json) => {
-    console.log('setElementParameters');
+
     let elementParameters = JSON.parse(json);
     // console.log("Step 1");
     // console.log(elementParameters);
@@ -147,9 +145,9 @@ window.callSetElementParameters = (dotNetObjectRef, id, json) => {
 };
 
 window.getProduct = (dotNetObjectRef) => {
-  console.log('callGetProduct clicked');
+  // console.log('callGetProduct clicked');
   let product = myDesigner.getProduct();
-  console.log(JSON.stringify(product));
+  // console.log(JSON.stringify(product));
   return JSON.stringify(product);
 };
 

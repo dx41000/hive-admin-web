@@ -1,0 +1,96 @@
+﻿@page "/Stores"
+@using hive_admin_web.Components.Dialog
+@using hive_admin_web.Models
+@using hive_admin_web.Services
+@using hive_admin_web.Services.Interfaces
+@using Newtonsoft.Json
+@using CreateProduct = hive_admin_web.Components.Dialog.CreateAsset
+@inject IDialogService DialogService
+@inject IStoreService StoreService;
+@inject AppState AppState;
+<PageTitle>Stores</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Stores</MudText>
+<MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+
+
+<MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="_table" >
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Stores</MudText>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Name" T="Store">
+        Name
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+
+    </MudTh>
+    <MudTh>
+
+    </MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd>@context.Name</MudTd>
+    <MudTd>
+      <MudButton @onclick="() => SelectStore(context.Name, context.Id, context.WorkspaceId)" Variant="Variant.Filled" Color="Color.Primary">
+        Select
+      </MudButton>
+    </MudTd>
+  </RowTemplate>
+  <PagerContent>
+    <MudTablePager />
+  </PagerContent>
+</MudTable>
+
+@* *@
+@* <MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary"> *@
+@*   Add Product *@
+@* </MudButton> *@
+@code {
+
+  private bool _isLoading;
+  private string _searchString = "";
+  private MudTable<Store> _table;
+  private long selectedProductId;
+  
+  private List<BreadcrumbItem> _items =
+  [
+    new("Products", href: "products")
+  ];
+
+  private async Task OpenDialogAsync()
+  {
+    var options = new DialogOptions
+    {
+      Position = DialogPosition.Center,
+      BackdropClick = true,
+      CloseOnEscapeKey = true,
+      NoHeader = false,
+      CloseButton = true,
+      FullWidth = true,
+      MaxWidth = MaxWidth.Small
+    };
+
+    //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
+    var result = await (await DialogService.ShowAsync<CreateProduct>("Create Product", options)).Result;
+    await _table.ReloadServerData();
+  }
+
+  private async Task<TableData<Store>> ServerReload(TableState state, CancellationToken token)
+  {
+    _isLoading = true;
+    var response = await StoreService.GetStoresAsync();
+    _isLoading = false;
+    return new TableData<Store>() { TotalItems = response.Count, Items = response };
+  }
+  private void SelectStore(string name, long storeId, long workspaceId)
+  {
+    AppState.StoreId = storeId;
+    AppState.StoreName = name;
+    AppState.WorkspaceId = workspaceId;
+    StateHasChanged();
+  }
+
+}

@@ -10,7 +10,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject IProductariantViewService ProductariantViewService;
-
+@inject AppState AppState;
 <PageTitle>Product Variant Views</PageTitle>
 
 <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
@@ -169,7 +169,7 @@
     _isLoading = true;
     overlayVisible = true;
     
-    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest(AppState)
     {
       ProductType = (int)productVariantView.ProductType,
       ProductVariantId = (long)productVariantView.ProductVariantId,
