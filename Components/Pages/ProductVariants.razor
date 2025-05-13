@@ -152,8 +152,10 @@ TestPrintFile
     _isLoading = true;
     overlayVisible = true;
     
-    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest(AppState)
+    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
+      StoreId = AppState.StoreId,
+      WorkspaceId = AppState.WorkspaceId,
       ProductVariantId = (long)productVariant.Id,
       ProductType = (int)productVariant.AssetVariant.Asset.ProductType,
       GenerateImages = []

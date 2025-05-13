@@ -1,11 +1,7 @@
 @page "/designer"
 @using hive_admin_web.Models
 @using hive_admin_web.Models.Designer
-@using hive_admin_web.Models.Enum
-@using hive_admin_web.Models.PrintReady
-@using hive_admin_web.Services
 @using hive_admin_web.Services.Interfaces
-@using hive.core.models.PrintReady
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @inject IJSRuntime JsRuntime
@@ -40,7 +36,6 @@
           <MudSwitch @bind-Value="Editable" Disabled="@(Editable==null)" Label="Editable" Color="Color.Primary" />
           <MudSwitch @bind-Value="ExcludeFromExport" Disabled="@(ExcludeFromExport==null)" Label="ExcludeFromExport" Color="Color.Primary" />
           <MudSwitch @bind-Value="Locked" Disabled="@(Locked==null)" Label="Locked" Color="Color.Primary" />
-          <MudButton OnClick="TestPrintFile"  Color="Color.Primary">Test Printfile</MudButton>
         </MudForm>
       </MudPaper>
     </MudItem>
@@ -470,41 +465,6 @@
   public async Task OnElementRemove()
   {
     DisableProperties();
-  }
-
-  private async Task TestPrintFile()
-  {
-    overlayVisible = true;
-    
-    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest(AppState)
-    {
-      ProductVariantId = (long)ProductVariantView.ProductVariantId,
-      ProductType = (int)ProductType.POD,
-      GenerateImages = new List<GenerateImage>
-      {
-        new()
-        {
-          ProductVariantViewId = (long)ProductVariantView.Id
-        }
-      }
-    });
-    
-    var json = response.Data.Payload.ToString();
-    var generateImageResponse = JsonConvert.DeserializeObject<GenerateImageResponse>(json);
-    
-    if (generateImageResponse?.PrintFile != null)
-    {
-      // Convert the response byte[] to a file download
-      var fileBytes = generateImageResponse.PrintFile; // Assuming the response has a byte[] called FileBytes
-      var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".pdf"; // Change the file extension/type as per your requirement
-        
-      // Trigger the download using JS interop
-      await JSRuntimeExtensions.InvokeVoidAsync(JsRuntime, "downloadFile", fileName, fileBytes);
-      
-      overlayVisible = false;
-      StateHasChanged();
-    }
-
   }
 
 

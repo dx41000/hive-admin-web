@@ -143,8 +143,10 @@
   {
     _isLoading = true;
     overlayVisible = true;
-    var request = new GenerateImageRequest(AppState)
+    var request = new GenerateImageRequest
     {
+      StoreId = AppState.StoreId,
+      WorkspaceId = AppState.WorkspaceId,
       ProductVariantId = long.Parse(ProductVariantId),
       ProductType = (int)ProductType.POD
     };
