@@ -15,7 +15,7 @@ window.initializePostMessageHandler = () => {
             return;
         }
 
-        if (event.data.action === "returnElements") {
+            if (event.data.action === "returnElements") {
             payload = event.data.payload;
             payload.forEach(element => {
                 addTextbox(element.id, element.text);

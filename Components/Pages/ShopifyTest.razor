@@ -130,11 +130,6 @@
     await ShowProduct();
   }
 
-  private async Task SaveDesign()
-  {
-    await JS.InvokeVoidAsync("postToIframe", "saveDesign", null);
-  }
-
   private async Task InitaliseDesigner()
   {
     await JS.InvokeVoidAsync("initializePostMessageHandler");
@@ -147,18 +142,18 @@
     AppState.TestProductVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
   }
 
-  private async Task ShowProduct()
-  {
-    viewName = AppState.TestProductVariantViews[_currentView].Name;
-    var uri = new Uri(Navigation.Uri);
-    currentUrl = "singleview.html?viewUrl=" + Uri.EscapeDataString( $"{uri.Scheme}://{uri.Host}:{uri.Port}/api/views/{AppState.TestProductVariantViews[_currentView].Id}");
+    private async Task ShowProduct()
+    {
+      viewName = AppState.TestProductVariantViews[_currentView].Name;
+      var uri = new Uri(Navigation.Uri);
+      currentUrl = "singleview.html?viewUrl=" + Uri.EscapeDataString( $"{uri.Scheme}://{uri.Host}:{uri.Port}/api/views/{AppState.TestProductVariantViews[_currentView].Id}");
 
-    var height = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasHeight;
-    var width = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasWidth;
-    
-    await JS.InvokeVoidAsync("resizeIframe", "myIframe", width, height); // Example dimensions
+      var height = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasHeight;
+      var width = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasWidth;
+      
+      await JS.InvokeVoidAsync("resizeIframe", "myIframe", width, height); // Example dimensions
 
-  }
+    }
 
   private async Task GetProductAndPrintOrderData()
   {
