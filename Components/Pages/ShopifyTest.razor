@@ -66,26 +66,15 @@
 <div class="container">
   <div class="left-container">
     <iframe id="myIframe" src="@currentUrl" frameborder="1"></iframe>
-
-
-
-    <div class="button-container">
-      <button class="button">
-        <MudButton @onclick="GetProductAndPrintOrderData" Variant="Variant.Filled" Color="Color.Primary">
-          Save View
-        </MudButton>
-      </button>
-      <button class="button">
-        <MudButton @onclick="CreatePrintFile" Variant="Variant.Filled" Color="Color.Primary">
-          Create Print File
-        </MudButton>
-      </button>
-    </div>
-    
   </div>
   <div class="right-container">
     <MudButton @onclick="ShowNextView" Variant="Variant.Filled" Color="Color.Primary">
       Show Next View
+    </MudButton>
+    <br/>
+    <br/>
+    <MudButton @onclick="CreatePrintFile" Variant="Variant.Filled" Color="Color.Primary">
+      Create Print File
     </MudButton>
     
     <br/><br/>
@@ -142,18 +131,17 @@
     AppState.TestProductVariantViews = JsonConvert.DeserializeObject<List<ProductVariantView>>(json);
   }
 
-    private async Task ShowProduct()
-    {
-      viewName = AppState.TestProductVariantViews[_currentView].Name;
-      var uri = new Uri(Navigation.Uri);
-      currentUrl = "singleview.html?viewUrl=" + Uri.EscapeDataString( $"{uri.Scheme}://{uri.Host}:{uri.Port}/api/views/{AppState.TestProductVariantViews[_currentView].Id}");
+  private async Task ShowProduct()
+  {
+    viewName = AppState.TestProductVariantViews[_currentView].Name;
+    var uri = new Uri(Navigation.Uri);
+    currentUrl = "singleview.html?viewUrl=" + Uri.EscapeDataString($"{uri.Scheme}://{uri.Host}:{uri.Port}/api/views/{AppState.TestProductVariantViews[_currentView].Id}");
 
-      var height = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasHeight;
-      var width = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasWidth;
-      
-      await JS.InvokeVoidAsync("resizeIframe", "myIframe", width, height); // Example dimensions
+    var height = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasHeight;
+    var width = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasWidth;
 
-    }
+    await JS.InvokeVoidAsync("resizeIframe", "myIframe", width, height); // Example dimensions
+  }
 
   private async Task GetProductAndPrintOrderData()
   {
@@ -166,8 +154,6 @@
     overlayVisible = true;
     var request = new GenerateImageRequest
     {
-      StoreId = AppState.StoreId,
-      WorkspaceId = AppState.WorkspaceId,
       ProductVariantId = long.Parse(ProductVariantId),
       ProductType = (int)ProductType.POD
     };
@@ -225,6 +211,11 @@
     parameters.Add("PdfBytes", pdfBytes);
     var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
     DialogService.Show<PdfDialog>(null, parameters, options);
+  }
+
+  private bool allDesignerJsonSet()
+  {
+    return AppState.TestProductVariantViews.All(view => view.PrintOrder != null);
   }
 
 }

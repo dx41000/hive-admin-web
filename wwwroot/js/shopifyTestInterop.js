@@ -8,14 +8,14 @@ function setupDotNetRef(ref) {
 window.initializePostMessageHandler = () => {
     let payload = [];
     
-    window.addEventListener("message", function (event) {
+    window.addEventListener("message", async function (event) {
         if (event.origin !== "https://localhost:7183" &&
         event.origin !== "http://hive-core-alb-production-1562672820.eu-west-2.elb.amazonaws.com:49160") {
             console.log("Received message from untrusted origin:", event.origin);
             return;
         }
 
-            if (event.data.action === "returnElements") {
+        if (event.data.action === "returnElements") {
             payload = event.data.payload;
             payload.forEach(element => {
                 addTextbox(element.id, element.text);
@@ -49,8 +49,16 @@ window.initializePostMessageHandler = () => {
                 });
         }
 
+        if (event.data.action === "updateElementComplete") {
+            console.log("updateElementComplete");
+            await getProductAndPrintOrderData();
+        };
     });
 
+    async function getProductAndPrintOrderData() {
+        document.getElementById("myIframe").contentWindow.postMessage({ action: "getProductAndPrintOrderData" }, "*");
+    }
+    
     function callBlazorMethod(payload) {
         try {
             dotNetRef.invokeMethodAsync('ReturnProductAndPrintOrderData', JSON.stringify(payload))

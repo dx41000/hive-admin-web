@@ -397,6 +397,11 @@
 
                 let element = myDesigner.getElementByID(data.payload.id);
                 myDesigner.setElementParameters(JSON.parse(JSON.stringify(data.payload)), element);
+
+                message = {
+                    action: "updateElementComplete"
+                };
+                parentWindow.postMessage(message, "*");
             }
         }
 

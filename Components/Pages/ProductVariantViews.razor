@@ -171,8 +171,6 @@
     
     var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
-      StoreId = AppState.StoreId,
-      WorkspaceId = AppState.WorkspaceId,
       ProductType = (int)productVariantView.ProductType,
       ProductVariantId = (long)productVariantView.ProductVariantId,
       GenerateImages = new List<GenerateImage>()
