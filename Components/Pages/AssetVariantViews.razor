@@ -73,9 +73,12 @@
       }
     </MudTd>
     <MudTd>
+    @if (context?.AssetVariant?.Asset?.ProductType == (int)ProductType.POD)
+    {
       <MudButton @onclick="() => UpdateAllAssetVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
         Update all views
       </MudButton>
+    }
     </MudTd>
     <MudTd>
       <MudButton @onclick="() => DeleteAssetVariantView(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">

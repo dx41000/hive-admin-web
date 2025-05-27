@@ -61,9 +61,12 @@
       }
     </MudTd>
     <MudTd>
-      <MudButton @onclick="() => UpdateAllProductVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
-        Update all views
-      </MudButton>
+      @if (context.ProductType == (int)ProductType.POD)
+      {
+        <MudButton @onclick="() => UpdateAllProductVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
+          Update all views
+        </MudButton>
+      }
     </MudTd>
     <MudTd>
       <MudButton @onclick="() => DeleteProductVariant(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
@@ -177,10 +180,27 @@
       {
         new GenerateImage()
         {
-          ProductVariantViewId = (int)productVariantView.Id
+          ProductVariantViewId = (int)productVariantView.Id,
+          PrintOrder = string.Empty
         }
       }
     });
+    
+    var json = response.Data.Payload.ToString();
+    var generateImageResponse = JsonConvert.DeserializeObject<GenerateImageResponse>(json);
+    
+    if (generateImageResponse?.PrintFile  != null)
+    {
+      // Convert the response byte[] to a file download
+      var fileBytes = generateImageResponse.PrintFile; // Assuming the response has a byte[] called FileBytes
+      var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".png"; // Change the file extension/type as per your requirement
+        
+      // Trigger the download using JS interop
+      await JSRuntimeExtensions.InvokeVoidAsync(JSRuntime, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+    }
+    
+    _isLoading = false;
+    overlayVisible = false;
   }
 
   private async Task UpdateAllProductVariantViews(ProductVariantView productVariantView)

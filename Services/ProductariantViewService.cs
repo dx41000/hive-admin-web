@@ -125,9 +125,8 @@ namespace hive_admin_web.Services
                 requestMessage.Headers.Add("api-version", apiVersion);
 
             var response = await _httpClient.SendAsync(requestMessage);
-            response.EnsureSuccessStatusCode();
-
             var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<ApiResponse>(content);
         }
         
