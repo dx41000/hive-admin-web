@@ -55,7 +55,8 @@ public class Startup(IConfiguration configuration)
         services.AddHttpClient("HiveCore", client =>
         {
             client.BaseAddress = new Uri(config.BaseUrl);
-            client.Timeout = TimeSpan.FromMinutes(2);
+            //client.Timeout = TimeSpan.FromMinutes(2);
+            client.Timeout = Timeout.InfiniteTimeSpan;
         });
 
         // Add Razor components
