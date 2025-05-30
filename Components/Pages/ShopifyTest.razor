@@ -179,9 +179,9 @@
       var fileName = "PrintFile-"+ DateTime.UtcNow.ToString("yyyyMMddhhmmss") +".pdf"; // Change the file extension/type as per your requirement
         
       // Trigger the download using JS interop
-      //await JSRuntimeExtensions.InvokeVoidAsync(JS, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
+      await JSRuntimeExtensions.InvokeVoidAsync(JS, "downloadFile", fileName, fileBytes).ConfigureAwait(false);
 
-      OpenImageDialog(fileBytes);
+      //OpenImageDialog(fileBytes);
       
       _isLoading = false;
       overlayVisible = false;
