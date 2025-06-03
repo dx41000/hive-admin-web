@@ -230,7 +230,7 @@ Resources:
     Type: AWS::CodeDeploy::Application
     Properties:
       ComputePlatform: ECS
-      ApplicationName: hive-core-production
+      ApplicationName: hive-web-production
 
   CodeDeployDeploymentGroup:
     DependsOn: ECSService 
@@ -262,7 +262,7 @@ Resources:
               ListenerArns:
                 - !Ref TestListener
       ECSServices:
-        - ClusterName: !Ref ECSCluster
+        - ClusterName: service-core
           ServiceName: !Sub hive-web-${EnvironmentName}
 
 
