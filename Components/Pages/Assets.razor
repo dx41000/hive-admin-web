@@ -13,6 +13,7 @@
 
 <MudText Typo="Typo.h4" GutterBottom="true">Assets</MudText>
 <MudBreadcrumbs Items="_items" Separator=">"></MudBreadcrumbs>
+
 <MudTable ServerData="ServerReload"  Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_isLoading" LoadingProgressColor="Color.Info"  @ref="_table" >
   <ToolBarContent>
     <MudText Typo="Typo.h6">Asset Variants</MudText>
@@ -22,17 +23,22 @@
   </ToolBarContent>
   <HeaderContent>
     <MudTh>
-      <MudTableSortLabel SortLabel="Name" T="AssetVariant">
+      <MudTableSortLabel  SortLabel="Id" T="Asset">
+        Id
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
+      <MudTableSortLabel SortLabel="Name" T="Asset">
         Name
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
-      <MudTableSortLabel SortLabel="HsCode" T="AssetVariant">
+      <MudTableSortLabel SortLabel="HsCode" T="Asset">
         HsCode
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
-      <MudTableSortLabel SortLabel="ProductType" T="AssetVariant">
+      <MudTableSortLabel SortLabel="ProductType" T="Asset">
         Asset Type
       </MudTableSortLabel>
     </MudTh>
@@ -44,6 +50,7 @@
     </MudTh>
   </HeaderContent>
   <RowTemplate>
+    <MudTd><a href="assetvariants/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="assetvariants/@context.Id">@context.Name</a></MudTd>
     <MudTd>@context.HsCode</MudTd>
     <MudTd>@(context.ProductType == 1 ? "Pod" : "All Over")</MudTd>
@@ -155,7 +162,14 @@
   private async Task<TableData<Asset>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await AssetService.GetAllAssetsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetService.GetAllAssetsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, 
+      state.SortDirection switch
+    {
+      SortDirection.None => "asc",
+      SortDirection.Ascending => "asc",
+      SortDirection.Descending => "desc",
+      _ => "asc"
+    });
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<Asset>>(json);
     _isLoading = false;

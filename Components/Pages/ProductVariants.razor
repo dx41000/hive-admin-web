@@ -30,10 +30,15 @@
   </ToolBarContent>
   <HeaderContent>
     <MudTh>
-        Variant 1
+      <MudTableSortLabel SortLabel="Id" T="ProductVariant">
+        Id
+      </MudTableSortLabel>
     </MudTh>
     <MudTh>
-        Variant 2
+      Variant 1
+    </MudTh>
+    <MudTh>
+      Variant 2
     </MudTh>
     <MudTh>
       Variant 3
@@ -43,6 +48,7 @@
     </MudTh>
   </HeaderContent>
   <RowTemplate>
+    <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.AssetVariant.Option1Type - @context.AssetVariant.Option1</a></MudTd>
     <MudTd>@context.AssetVariant.Option2Type - @context.AssetVariant.Option2</MudTd>
     <MudTd>@context.AssetVariant.Option3Type - @context.AssetVariant.Option3</MudTd>
@@ -123,7 +129,14 @@
   private async Task<TableData<ProductVariant>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await ProductVariantService.GetAllProductVariantsAsync(long.Parse(productDraftId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await ProductVariantService.GetAllProductVariantsAsync(long.Parse(productDraftId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, 
+      state.SortDirection switch
+      {
+        SortDirection.None => "asc",
+        SortDirection.Ascending => "asc",
+        SortDirection.Descending => "desc",
+        _ => "asc"
+      });
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<ProductVariant>>(json);
     _isLoading = false;

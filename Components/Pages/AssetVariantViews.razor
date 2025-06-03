@@ -24,6 +24,11 @@
   </ToolBarContent>
   <HeaderContent>
     <MudTh>
+      <MudTableSortLabel SortLabel="Id" T="AssetVariantView">
+        Id
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
       <MudTableSortLabel SortLabel="Name" T="AssetVariantView">
         Name
       </MudTableSortLabel>
@@ -42,6 +47,7 @@
     </MudTh>
   </HeaderContent>
   <RowTemplate>
+    <MudTd>@context.Id</MudTd>
     <MudTd>@context.Name</MudTd>
     <MudTd>@context.OutputWidth</MudTd>
     <MudTd>@context.OutputHeight</MudTd>
@@ -196,7 +202,14 @@
   private async Task<TableData<AssetVariantView>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await AssetVariantViewService.GetAllAssetVariantViewsByIdAsync(long.Parse(productVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetVariantViewService.GetAllAssetVariantViewsByIdAsync(long.Parse(productVariantId), state.Page + 1, state.PageSize, _searchString, state.SortLabel,
+      state.SortDirection switch
+      {
+        SortDirection.None => "asc",
+        SortDirection.Ascending => "asc",
+        SortDirection.Descending => "desc",
+        _ => "asc"
+      });
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<AssetVariantView>>(json);
     _isLoading = false;

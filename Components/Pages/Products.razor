@@ -22,15 +22,20 @@
   </ToolBarContent>
   <HeaderContent>
     <MudTh>
+      <MudTableSortLabel  SortLabel="Id" T="Product">
+        Id
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
       <MudTableSortLabel SortLabel="Name" T="Product">
         Name
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
-        HsCode
+      HsCode
     </MudTh>
     <MudTh>
-        Asset Type
+      Asset Type
     </MudTh>
     <MudTh>
 
@@ -40,6 +45,7 @@
     </MudTh>
   </HeaderContent>
   <RowTemplate>
+    <MudTd><a href="Productvariants/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="Productvariants/@context.Id">@context.Name</a></MudTd>
     <MudTd>@context.Asset.HsCode</MudTd>
     <MudTd>@(context.Asset.ProductType == 1 ? "Pod" : "All Over")</MudTd>
@@ -91,7 +97,14 @@
   private async Task<TableData<Product>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await ProductService.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await ProductService.GetAllProductsAsync( state.Page + 1, state.PageSize, _searchString, state.SortLabel, 
+      state.SortDirection switch
+      {
+        SortDirection.None => "asc",
+        SortDirection.Ascending => "asc",
+        SortDirection.Descending => "desc",
+        _ => "asc"
+      });
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<Product>>(json);
     _isLoading = false;

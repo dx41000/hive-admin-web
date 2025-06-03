@@ -21,14 +21,19 @@
   </ToolBarContent>
   <HeaderContent>
     <MudTh>
+      <MudTableSortLabel  SortLabel="Id" T="AssetVariant">
+        Id
+      </MudTableSortLabel>
+    </MudTh>
+    <MudTh>
       <MudTableSortLabel SortLabel="Option1" T="AssetVariant">
         Variant 1
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
-    <MudTableSortLabel SortLabel="Option2" T="AssetVariant">
-      Variant 2
-    </MudTableSortLabel>
+      <MudTableSortLabel SortLabel="Option2" T="AssetVariant">
+        Variant 2
+      </MudTableSortLabel>
     </MudTh>
     <MudTh>
       <MudTableSortLabel SortLabel="Option3" T="AssetVariant">
@@ -45,6 +50,7 @@
     </MudTh>
   </HeaderContent>
   <RowTemplate>
+    <MudTd><a href="assetVariantViews/@context.AssetId/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="assetVariantViews/@context.AssetId/@context.Id">@context.Option1Type - @context.Option1</a></MudTd>
     <MudTd>@context.Option2Type - @context.Option2</MudTd>
     <MudTd>@context.Option3Type - @context.Option3</MudTd>
@@ -63,18 +69,18 @@
       }
     </MudTh>
     <MudTh>
-    @if (context.Asset.ProductType == (int)ProductType.POD)
-    {
-      <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
-        <ActivatorContent>
-          <MudButton Variant="Variant.Filled"
-                     Color="Color.Primary"
-                     StartIcon="@Icons.Material.Filled.CloudUpload">
-            Upload
-          </MudButton>
-        </ActivatorContent>
-      </MudFileUpload>
-    }
+      @if (context.Asset.ProductType == (int)ProductType.POD)
+      {
+        <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
+          <ActivatorContent>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.CloudUpload">
+              Upload
+            </MudButton>
+          </ActivatorContent>
+        </MudFileUpload>
+      }
     </MudTh>
     <MudTd>
       <MudButton @onclick="() => DeleteAssetVariant(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
@@ -138,7 +144,14 @@
   private async Task<TableData<AssetVariant>> ServerReload(TableState state, CancellationToken token)
   {
     _isLoading = true;
-    var response = await AssetVariantService.GetAllAssetVariantsByIdAsync(long.Parse(assetId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, state.SortDirection == SortDirection.Ascending ? "asc" : "desc");
+    var response = await AssetVariantService.GetAllAssetVariantsByIdAsync(long.Parse(assetId), state.Page + 1, state.PageSize, _searchString, state.SortLabel, 
+      state.SortDirection switch
+      {
+        SortDirection.None => "asc",
+        SortDirection.Ascending => "asc",
+        SortDirection.Descending => "desc",
+        _ => "asc"
+      });
     var json = response.Data.Payload.ToString();
     var pagedData = JsonConvert.DeserializeObject<List<AssetVariant>>(json);
     _isLoading = false;
