@@ -6,6 +6,8 @@ public class GenerateImageRequest
     public long ProductVariantId { get; set; }
     public int ProductType { get; set; }
     public List<GenerateImage> GenerateImages { get; set; } = new List<GenerateImage>();
+    public bool CreateThumbnail { get; set; } = false;
+    public bool ReturnImage { get; set; } = false;
 }
 
 public class GenerateImage
