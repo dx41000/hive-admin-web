@@ -43,12 +43,20 @@
     <MudTh>
 
     </MudTh>
+    <MudTh>
+
+    </MudTh>
   </HeaderContent>
   <RowTemplate>
     <MudTd><a href="Productvariants/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="Productvariants/@context.Id">@context.Name</a></MudTd>
     <MudTd>@context.Asset.HsCode</MudTd>
     <MudTd>@(context.Asset.ProductType == 1 ? "Pod" : "All Over")</MudTd>
+    <MudTd>
+      <MudButton @onclick="() => Publish(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
+        Publish
+      </MudButton>
+    </MudTd>
     <MudTd>
       <MudButton @onclick="() => DeleteProduct(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
         Delete
@@ -144,6 +152,13 @@
   {
     Console.WriteLine("No clicked");
     return Task.CompletedTask;
+  }
+
+  private async Task Publish(long productId)
+  {
+    _isLoading = true;
+    await ProductService.Publish(productId);
+    _isLoading = false;
   }
 
 }

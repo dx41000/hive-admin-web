@@ -114,4 +114,19 @@ public class ProductService(IHttpClientFactory httpClientFactory, AppState appSt
         var response = await _httpClient.SendAsync(requestMessage);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task Publish(long productId, string apiVersion = null)
+    {
+        var storeId = appState.StoreId;
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"api/product/publish/{productId}/{storeId}");
+
+        if (!string.IsNullOrEmpty(apiVersion))
+            requestMessage.Headers.Add("api-version", apiVersion);
+
+        var response = await _httpClient.SendAsync(requestMessage);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(content);
+    }
 }

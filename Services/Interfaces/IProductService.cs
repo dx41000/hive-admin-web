@@ -14,4 +14,5 @@ public interface IProductService
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0");
 
     Task Wizard(CreateProduct createProduct,  string apiVersion = null);
+    Task Publish(long productId, string apiVersion = null);
 }
