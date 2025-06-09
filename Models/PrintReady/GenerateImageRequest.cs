@@ -7,7 +7,6 @@ public class GenerateImageRequest
     public int ProductType { get; set; }
     public List<GenerateImage> GenerateImages { get; set; } = new List<GenerateImage>();
     public bool CreateThumbnail { get; set; } = false;
-    public bool ReturnImage { get; set; } = false;
 }
 
 public class GenerateImage
