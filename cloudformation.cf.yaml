@@ -185,32 +185,32 @@ Resources:
         - Key: Environment
           Value: !Ref EnvironmentName
 
-  ALBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: !Sub hive-web-alb-${EnvironmentName}
-      GroupDescription: Allow HTTP in and all traffic out
-      VpcId: !Ref VpcId
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 81
-          ToPort: 81
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: -1
-          FromPort: 0
-          ToPort: 0
-          CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: System
-          Value: Hive
-        - Key: Environment
-          Value: !Ref EnvironmentName
+  # ALBSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupName: !Sub hive-web-alb-${EnvironmentName}
+  #     GroupDescription: Allow HTTP in and all traffic out
+  #     VpcId: !Ref VpcId
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 0.0.0.0/0
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 81
+  #         ToPort: 81
+  #         CidrIp: 0.0.0.0/0
+  #     SecurityGroupEgress:
+  #       - IpProtocol: -1
+  #         FromPort: 0
+  #         ToPort: 0
+  #         CidrIp: 0.0.0.0/0
+  #     Tags:
+  #       - Key: System
+  #         Value: Hive
+  #       - Key: Environment
+  #         Value: !Ref EnvironmentName
 
   ECSTaskSecurityGroup:
     Type: AWS::EC2::SecurityGroup
