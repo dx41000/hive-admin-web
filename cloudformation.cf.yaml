@@ -67,6 +67,22 @@ Resources:
         - Key: Environment
           Value: !Ref EnvironmentName
 
+
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 49158
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: "arn:aws:acm:eu-west-2:891377085221:certificate/803828c2-b0ed-471f-92ef-5ce2209c593e"
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+
+
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -74,7 +90,9 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${InfraStack}-${EnvironmentName}-LoadBalancerARN"
       Port: 49160
-      Protocol: HTTP
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: "arn:aws:acm:eu-west-2:891377085221:certificate/803828c2-b0ed-471f-92ef-5ce2209c593e"
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
@@ -86,7 +104,9 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${InfraStack}-${EnvironmentName}-LoadBalancerARN"
       Port: 49161
-      Protocol: HTTP
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: "arn:aws:acm:eu-west-2:891377085221:certificate/803828c2-b0ed-471f-92ef-5ce2209c593e"
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup2
@@ -190,7 +210,7 @@ Resources:
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 49160
-          ToPort: 49160
+          ToPort: 49161
           CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: -1
