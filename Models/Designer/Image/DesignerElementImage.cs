@@ -31,7 +31,7 @@ public class DesignerElementImage
 
     [JsonProperty("colorPrices")] public ColorPrices ColorPrices;
 
-    [JsonProperty("colors")] public List<string> Colors;
+    // [JsonProperty("colors")] public List<string> Colors;
 
     [JsonProperty("copyable")] public bool Copyable;
 
