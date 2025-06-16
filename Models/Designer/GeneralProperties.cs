@@ -4,6 +4,8 @@ namespace hive_admin_web.Models.Designer;
 
 public class GeneralProperties
 {    
+    [JsonProperty("title")]
+    public string? Title { get; set; }
     [JsonProperty("maxFontSize")]
     public int? MaxFontSize { get; set; }
     [JsonProperty("minFontSize")]

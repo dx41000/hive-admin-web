@@ -20,10 +20,10 @@ window.initializePostMessageHandler = () => {
         }
 
         if (event.data.action === "returnElements") {
-            payload = event.data.payload;
-            payload.forEach(element => {
-                addTextbox(element.id, element.text);
-            });
+             payload = event.data.payload;
+            // payload.forEach(element => {
+            //     addTextbox(element.id, element.text);
+            // });
             returnElements();
         }
 
@@ -78,22 +78,22 @@ window.initializePostMessageHandler = () => {
         }
     }
     
-    function addTextbox(labelText, textboxText) {
-        const container = document.getElementById('elements');
-        const wrapperDiv = document.createElement('div');
-        const label = document.createElement('label');
-        label.textContent = labelText + ': ';
-        const newTextbox = document.createElement('input');
-        newTextbox.type = 'text';
-        newTextbox.value = textboxText;
-        newTextbox.id = 'textbox_' + new Date().getTime();
-        label.setAttribute('for', newTextbox.id);
-        newTextbox.placeholder = 'Enter text here';
-        wrapperDiv.appendChild(label);
-        wrapperDiv.appendChild(newTextbox);
-        container.appendChild(wrapperDiv);
-        container.appendChild(document.createElement('br'));
-    }
+    // function addTextbox(labelText, textboxText) {
+    //     const container = document.getElementById('elements');
+    //     const wrapperDiv = document.createElement('div');
+    //     const label = document.createElement('label');
+    //     label.textContent = labelText + ': ';
+    //     const newTextbox = document.createElement('input');
+    //     newTextbox.type = 'text';
+    //     newTextbox.value = textboxText;
+    //     newTextbox.id = 'textbox_' + new Date().getTime();
+    //     label.setAttribute('for', newTextbox.id);
+    //     newTextbox.placeholder = 'Enter text here';
+    //     wrapperDiv.appendChild(label);
+    //     wrapperDiv.appendChild(newTextbox);
+    //     container.appendChild(wrapperDiv);
+    //     container.appendChild(document.createElement('br'));
+    // }
 
     function returnElements() {
         var iframe = document.getElementById("myIframe");
@@ -101,7 +101,7 @@ window.initializePostMessageHandler = () => {
 
         for (let index = 0; index < payload.length; index++) {
             const element = payload[index];
-            customiseHtml += GenerateTextbox(element.id, element.designerIndex, element.text);
+            customiseHtml += GenerateTextbox(element.id, element.designerIndex, element.title, element.text);
         }
 
         document.getElementById('elements').innerHTML = customiseHtml;
@@ -128,8 +128,8 @@ window.initializePostMessageHandler = () => {
         });
     }
 
-    function GenerateTextbox(id, index, value) {
-        return `<input id="txtElementUpdate" name="${id}" data-id="${id}" data-index="${index}" onClick="this.setSelectionRange(0, this.value.length)" type="text" value="${value}" /> </br></br>`;
+    function GenerateTextbox(id, index, label, value) {
+        return `<br/><label>${label}</label><br/><input id="txtElementUpdate" name="${id}" data-id="${id}" data-index="${index}" onClick="this.setSelectionRange(0, this.value.length)" type="text" value="${value}" /> </br></br>`;
     }
 };
 

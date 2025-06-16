@@ -121,6 +121,8 @@ public class DesignerElementImage
 
     [JsonProperty("topped")] public bool Topped;
 
+    [JsonProperty("title")] public string Title;
+
     [JsonProperty("uniScalingUnlockable")] public bool UniScalingUnlockable;
 
     [JsonProperty("uploadZone")] public bool UploadZone;

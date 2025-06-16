@@ -22,20 +22,21 @@
     <MudItem xs="12" sm="3">
       <MudPaper Class="pa-4">
         <MudForm @ref="form" @bind-IsValid="@_success" @bind-Errors="@_errors">
-          <MudNumericField @bind-Value="Width" Disabled="@(Width==null)" Label="Width"/>
-          <MudNumericField @bind-Value="MaxFontSize" Disabled="@(MaxFontSize==null)" Label="Max Font Size"/>
-          <MudNumericField @bind-Value="MinFontSize" Disabled="@(MinFontSize==null)" Label="Min Font Size"/>
-          <MudNumericField @bind-Value="WidthFontSize" Disabled="@(WidthFontSize==null)" Label="Width Font Size"/>
-          <MudNumericField @bind-Value="MaxLength" Disabled="@(MaxLength==null)" Label="Max Length" />
-          <MudSwitch @bind-Value="ZChangeable" Disabled="@(ZChangeable==null)" Label="ZChangeable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Copyable" Disabled="@(Copyable==null)" Label="Copyable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Draggable" Disabled="@(Draggable==null)" Label="Draggable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Rotatable" Disabled="@(Rotatable==null)" Label="Rotatable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Removable" Disabled="@(Removable==null)" Label="Removable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Resizable" Disabled="@(Resizable==null)" Label="Resizable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Editable" Disabled="@(Editable==null)" Label="Editable" Color="Color.Primary" />
-          <MudSwitch @bind-Value="ExcludeFromExport" Disabled="@(ExcludeFromExport==null)" Label="ExcludeFromExport" Color="Color.Primary" />
-          <MudSwitch @bind-Value="Locked" Disabled="@(Locked==null)" Label="Locked" Color="Color.Primary" />
+          <MudTextField @bind-Value="Title" Disabled="@(Title == null)" Label="Title"></MudTextField>
+          <MudNumericField @bind-Value="Width" Disabled="@(Width == null)" Label="Width"/>
+          <MudNumericField @bind-Value="MaxFontSize" Disabled="@(MaxFontSize == null)" Label="Max Font Size"/>
+          <MudNumericField @bind-Value="MinFontSize" Disabled="@(MinFontSize == null)" Label="Min Font Size"/>
+          <MudNumericField @bind-Value="WidthFontSize" Disabled="@(WidthFontSize == null)" Label="Width Font Size"/>
+          <MudNumericField @bind-Value="MaxLength" Disabled="@(MaxLength == null)" Label="Max Length"/>
+          <MudSwitch @bind-Value="ZChangeable" Disabled="@(ZChangeable == null)" Label="ZChangeable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Copyable" Disabled="@(Copyable == null)" Label="Copyable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Draggable" Disabled="@(Draggable == null)" Label="Draggable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Rotatable" Disabled="@(Rotatable == null)" Label="Rotatable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Removable" Disabled="@(Removable == null)" Label="Removable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Resizable" Disabled="@(Resizable == null)" Label="Resizable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Editable" Disabled="@(Editable == null)" Label="Editable" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="ExcludeFromExport" Disabled="@(ExcludeFromExport == null)" Label="ExcludeFromExport" Color="Color.Primary"/>
+          <MudSwitch @bind-Value="Locked" Disabled="@(Locked == null)" Label="Locked" Color="Color.Primary"/>
         </MudForm>
       </MudPaper>
     </MudItem>
@@ -48,6 +49,7 @@
   private bool overlayVisible;
   
   private long? _id;
+  private string? _title;
   private int? _maxFontSize;
   private int? _minFontSize;
   private int? _widthFontSize;
@@ -104,6 +106,16 @@
     set
     {
       _id = value;
+    }
+  }
+  
+  public string? Title
+  {
+    get => _title;
+    set
+    {
+      _title = value;
+      _ = SetElementParameters();
     }
   }
   
@@ -318,6 +330,7 @@
     {
       var json = JsonConvert.SerializeObject(new GeneralProperties
       {
+        Title = Title ?? String.Empty,
         MaxFontSize = MaxFontSize ?? 0,
         MinFontSize = MinFontSize ?? 0,
         WidthFontSize = WidthFontSize ?? 0,
@@ -342,6 +355,7 @@
   private void DisableProperties()
   {
     UpdateElement = false;
+    Title = null;
     MaxFontSize = null;
     MinFontSize = null;
     WidthFontSize = null;
@@ -383,6 +397,15 @@
   [JSInvokable("OnElementSelect")]
   public async Task OnElementSelect(string json)
   {
+
+    // if (string.IsNullOrWhiteSpace(json))
+    // {
+    //   UpdateElement = false;
+    //   UnSetParams();
+    //   UpdateElement = true;
+    //   return;
+    // }
+
     var jsonObject = JObject.Parse(json);
 
     var type = jsonObject["type"]?.ToString();
@@ -406,14 +429,32 @@
   [JSInvokable("OnElementUnSelect")]
   public async Task OnElementUnSelect()
   {
-    UpdateElement = false;
-    DisableProperties();
-    UpdateElement = true;
+    // UpdateElement = false;
+    // DisableProperties();
+    // UpdateElement = true;
+  }
+
+  private void UnSetParams()
+  {
+    Id = null;
+    Title = null;
+    Copyable = null;
+    Rotatable = null;
+    Draggable = null;
+    Removable = null;
+    Resizable = null;
+    Editable = null;
+    ExcludeFromExport = null;
+    Locked = null;
+    Width = null;
+    ZChangeable = null;
+    StateHasChanged();
   }
 
   private void SetParams(DesignerElementImage designerElementImage)
   {
     Id = designerElementImage.Id;
+    Title = designerElementImage.Title;    
     Copyable = designerElementImage.Copyable;
     Rotatable = designerElementImage.Rotatable;
     Draggable = designerElementImage.Draggable;
@@ -430,6 +471,7 @@
   private void SetParams(DesignerElementText designerElementText)
   {
     Id = designerElementText.Id;
+    Title = designerElementText.Title;    
     Copyable = designerElementText.Copyable;
     Rotatable = designerElementText.Rotatable;
     Draggable = designerElementText.Draggable;

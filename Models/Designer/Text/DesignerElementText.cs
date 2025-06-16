@@ -167,6 +167,7 @@ public class DesignerElementText
     [JsonProperty("textPlaceholder")] public bool TextPlaceholder;
 
     [JsonProperty("textTransform")] public string TextTransform;
+    [JsonProperty("title")] public string Title;
 
     [JsonProperty("top")] public double Top;
 
