@@ -70,7 +70,11 @@ function addCustomImage(a,b,options,d) {
 }
 
 window.callOnElementSelect = (dotNetObjectRef, element) => {
+  
   $(element).on('elementSelect', function (event,fabricObject) {
+    
+    console.log(event);
+    console.log(fabricObject);
     
       if (fabricObject != null) {
         let generalProperties = {

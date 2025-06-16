@@ -35,8 +35,7 @@ public class AssetService(IHttpClientFactory httpClientFactory) : IAssetService
             requestMessage.Headers.Add("api-version", apiVersion);
 
         var response = await _httpClient.SendAsync(requestMessage);
-        response.EnsureSuccessStatusCode();
-
+        //response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         var assets = JsonConvert.DeserializeObject<PagedResponse>(content);
         return assets;

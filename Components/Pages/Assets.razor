@@ -104,6 +104,19 @@
     await _table.ReloadServerData();
   }
 
+  private async Task OpenErrorDialogAsync(string message)
+  {
+    var parameters = new DialogParameters
+    {
+      { "Title", "Error" },
+      { "MainText", message },
+      { "OnOK", EventCallback.Factory.Create(this, OkAction) },
+    };
+
+    var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Small };
+    await DialogService.ShowAsync<ErrorDialog>("", parameters, options);
+  }
+
   private async Task YesActionDeleteAsset()
   {
     Console.WriteLine("Yes clicked : " + selectAssetId);
@@ -117,6 +130,12 @@
     return Task.CompletedTask;
   }
 
+  private Task OkAction()
+  {
+    return Task.CompletedTask;
+  }
+
+  
   private async Task DeleteAsset(long assetId)
   {
     selectAssetId = assetId;
@@ -170,10 +189,20 @@
       SortDirection.Descending => "desc",
       _ => "asc"
     });
-    var json = response.Data.Payload.ToString();
-    var pagedData = JsonConvert.DeserializeObject<List<Asset>>(json);
-    _isLoading = false;
-    return new TableData<Asset>() { TotalItems = response.Pagination.Total, Items = pagedData };
+
+    if (!response.Success)
+    {
+      await OpenErrorDialogAsync(response.Data.Message);
+      _isLoading = false;
+      return new TableData<Asset>() { TotalItems = response.Pagination.Total, Items = new List<Asset>() };
+    }
+    else
+    {
+      var json = response.Data.Payload.ToString();
+      var pagedData = JsonConvert.DeserializeObject<List<Asset>>(json);
+      _isLoading = false;
+      return new TableData<Asset>() { TotalItems = response.Pagination.Total, Items = pagedData };
+    }
   }
 
   private void OnSearch(string text)
