@@ -3,7 +3,11 @@ using hive_admin_web.Models;
 using hive_admin_web.Models.AppSettings;
 using hive_admin_web.Services;
 using hive_admin_web.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
 
 namespace hive_admin_web;
@@ -27,7 +31,8 @@ public class Startup(IConfiguration configuration)
         services.AddTransient<IProductVariantService, ProductVariantService>();
         services.AddTransient<IStoreService, StoreService>();
         services.AddSingleton<AppState>();
-
+        services.AddTransient<AccessTokenService>();
+        services.AddHttpContextAccessor();
         
         // Configure SignalR
         services.AddSignalR(options =>
@@ -57,22 +62,63 @@ public class Startup(IConfiguration configuration)
             client.BaseAddress = new Uri(config.BaseUrl);
             //client.Timeout = TimeSpan.FromMinutes(2);
             client.Timeout = Timeout.InfiniteTimeSpan;
-        });
+        })
+        .AddHttpMessageHandler<AccessTokenService>();
 
         // Add Razor components
         services.AddRazorComponents()
             .AddInteractiveServerComponents();
         
         services.AddControllers(); 
+        
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+            .AddCookie()
+            .AddOpenIdConnect(options =>
+            {
+                //
+                options.MetadataAddress = "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_pvR2avA9O/.well-known/openid-configuration";
+                options.ClientId = "3ukppiajum9dksjjkrb9oqf39a";
+                options.ClientSecret = "1nfdp48of878toicdm1qi16mm35j6mng7bg3jr0i1iemn09rt1tl";
+                options.Authority = "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_pvR2avA9O";
+                options.CallbackPath = "/signin-oidc";
+                options.ResponseType = OpenIdConnectResponseType.Code;
+                options.SignedOutCallbackPath = "/signedout-oidc";
+                options.UseTokenLifetime = true;
+
+                options.Scope.Clear(); // Optional: start fresh
+                options.Scope.Add("openid"); // ✅ required
+                options.Scope.Add("email");  // ✅ match what you enable in Cognito
+                //options.Scope.Add("profile"); // ✅ optional
+                
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true
+                };
+                options.SaveTokens = true;
+                // options.Events = new OpenIdConnectEvents
+                // {
+                //     OnRedirectToIdentityProviderForSignOut = OnRedirectToIdentityProviderForSignOut
+                // };
+            });
+
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (!env.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Error", createScopeForErrors: true);
-            app.UseHsts();
-        }
+        // if (!env.IsDevelopment())
+        // {
+        //     app.UseExceptionHandler("/Error", createScopeForErrors: true);
+        //     app.UseHsts();
+        // }
+        // else
+        // {
+            app.UseDeveloperExceptionPage();
+       // }
 
         //app.UseHttpsRedirection();
         app.UseStaticFiles();
@@ -80,8 +126,8 @@ public class Startup(IConfiguration configuration)
         app.UseRouting();
 
         // If using authentication/authorization, include these first:
-        // app.UseAuthentication();
-        // app.UseAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         // ✅ Add Antiforgery middleware *after* UseRouting and before UseEndpoints
         app.UseAntiforgery();

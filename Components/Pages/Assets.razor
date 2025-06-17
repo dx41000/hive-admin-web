@@ -3,11 +3,13 @@
 @using hive_admin_web.Models
 @using hive_admin_web.Services
 @using hive_admin_web.Services.Interfaces
+@using Microsoft.AspNetCore.Authorization
 @using Newtonsoft.Json
 @using CreateAsset = hive_admin_web.Components.Dialog.CreateAsset
 @using CreateProduct = hive_admin_web.Components.Dialog.CreateProductDraft
 @inject IDialogService DialogService
 @inject IAssetService AssetService;
+@attribute [Authorize]
 
 <PageTitle>Assets</PageTitle>
 

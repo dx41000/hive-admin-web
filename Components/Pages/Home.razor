@@ -1,6 +1,35 @@
 ﻿@page "/"
 @page "/home"
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authorization
+@inject IHttpContextAccessor HttpContextAccessor
+@attribute [Authorize]
 
 <PageTitle>Print On Demand</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">Print On Demand</MudText>
+
+@code {
+    private string? accessToken;
+    private string? idToken;
+    private string? refreshToken;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var context = HttpContextAccessor.HttpContext;
+            if (context?.User?.Identity?.IsAuthenticated ?? false)
+            {
+                accessToken = await context.GetTokenAsync("access_token");
+                idToken = await context.GetTokenAsync("id_token");
+                refreshToken = await context.GetTokenAsync("refresh_token");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log or handle the error appropriately
+            Console.Error.WriteLine($"Token retrieval failed: {ex.Message}");
+        }
+    }
+}
