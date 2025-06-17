@@ -6,6 +6,7 @@ using hive_admin_web.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
@@ -100,12 +101,35 @@ public class Startup(IConfiguration configuration)
                     ValidateIssuer = true
                 };
                 options.SaveTokens = true;
-                // options.Events = new OpenIdConnectEvents
-                // {
-                //     OnRedirectToIdentityProviderForSignOut = OnRedirectToIdentityProviderForSignOut
-                // };
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnRedirectToIdentityProvider = context =>
+                    {
+                        var request = context.Request;
+
+                        // var forwardedProto = request.Headers["X-Forwarded-Proto"].ToString();
+                        // if (forwardedProto == "https")
+                        // {
+                            var uriBuilder = new UriBuilder(context.ProtocolMessage.RedirectUri)
+                            {
+                                Scheme = "https",
+                                Port = -1 // remove the port if it's not needed
+                            };
+                            context.ProtocolMessage.RedirectUri = uriBuilder.ToString();
+                        // }
+
+                        return Task.CompletedTask;
+                    }
+                };
+
             });
 
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor;
+         
+        });
+        
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -123,6 +147,14 @@ public class Startup(IConfiguration configuration)
         //app.UseHttpsRedirection();
         app.UseStaticFiles();
 
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
+            // Optionally restrict trusted networks
+            // KnownNetworks = { new IPNetwork(IPAddress.Parse("172.31.0.0"), 16) }, // Example VPC
+            // KnownProxies = { IPAddress.Parse("your-alb-ip") } 
+        });
+        
         app.UseRouting();
 
         // If using authentication/authorization, include these first:
