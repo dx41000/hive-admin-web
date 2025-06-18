@@ -104,13 +104,20 @@ public class Startup(IConfiguration configuration)
                 {
                     OnRedirectToIdentityProvider = context =>
                     {
+                        var env = context.HttpContext.RequestServices
+                            .GetRequiredService<IWebHostEnvironment>();
+
                         var uriBuilder = new UriBuilder(context.ProtocolMessage.RedirectUri)
                         {
-                            Scheme = "https",
-                            //Port = -1 // remove the port if it's not needed
+                            Scheme = "https"
                         };
-                        context.ProtocolMessage.RedirectUri = uriBuilder.ToString();
 
+                        if (!env.IsDevelopment())
+                        {
+                            uriBuilder.Port = -1; // Remove port only in development
+                        }
+
+                        context.ProtocolMessage.RedirectUri = uriBuilder.ToString();
                         return Task.CompletedTask;
                     }
                 };
