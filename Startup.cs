@@ -91,10 +91,9 @@ public class Startup(IConfiguration configuration)
                 options.SignedOutCallbackPath = "/signedout-oidc";
                 options.UseTokenLifetime = true;
 
-                options.Scope.Clear(); // Optional: start fresh
-                options.Scope.Add("openid"); // ✅ required
-                options.Scope.Add("email");  // ✅ match what you enable in Cognito
-                //options.Scope.Add("profile"); // ✅ optional
+                options.Scope.Clear();
+                options.Scope.Add("openid");
+                options.Scope.Add("email"); 
                 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -105,23 +104,16 @@ public class Startup(IConfiguration configuration)
                 {
                     OnRedirectToIdentityProvider = context =>
                     {
-                        var request = context.Request;
-
-                        // var forwardedProto = request.Headers["X-Forwarded-Proto"].ToString();
-                        // if (forwardedProto == "https")
-                        // {
-                            var uriBuilder = new UriBuilder(context.ProtocolMessage.RedirectUri)
-                            {
-                                Scheme = "https",
-                                Port = -1 // remove the port if it's not needed
-                            };
-                            context.ProtocolMessage.RedirectUri = uriBuilder.ToString();
-                        // }
+                        var uriBuilder = new UriBuilder(context.ProtocolMessage.RedirectUri)
+                        {
+                            Scheme = "https",
+                            //Port = -1 // remove the port if it's not needed
+                        };
+                        context.ProtocolMessage.RedirectUri = uriBuilder.ToString();
 
                         return Task.CompletedTask;
                     }
                 };
-
             });
 
         services.Configure<ForwardedHeadersOptions>(options =>
@@ -129,7 +121,6 @@ public class Startup(IConfiguration configuration)
             options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor;
          
         });
-        
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -150,30 +141,21 @@ public class Startup(IConfiguration configuration)
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
             ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor,
-            // Optionally restrict trusted networks
-            // KnownNetworks = { new IPNetwork(IPAddress.Parse("172.31.0.0"), 16) }, // Example VPC
-            // KnownProxies = { IPAddress.Parse("your-alb-ip") } 
         });
         
         app.UseRouting();
-
-        // If using authentication/authorization, include these first:
         app.UseAuthentication();
         app.UseAuthorization();
-
-        // ✅ Add Antiforgery middleware *after* UseRouting and before UseEndpoints
         app.UseAntiforgery();
 
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-
             endpoints.MapGet("/health", async context =>
             {
                 await context.Response.WriteAsync("Healthy");
             });
-            
             endpoints.MapControllers();
         });
     }

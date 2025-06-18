@@ -11,7 +11,7 @@ public class StoreService(IHttpClientFactory httpClientFactory) : IStoreService
     
     public async Task<IList<Store>> GetStoresAsync(string apiVersion = null)
     {
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/store/all");
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/store/all/1");
 
         if (!string.IsNullOrEmpty(apiVersion))
             requestMessage.Headers.Add("api-version", apiVersion);
