@@ -55,7 +55,7 @@
     <MudTd>@context.Option2Type - @context.Option2</MudTd>
     <MudTd>@context.Option3Type - @context.Option3</MudTd>
     <MudTh>
-      @if (context.Asset.ProductType == (int)ProductType.POD)
+      @if (context.Asset.ImageSource == (int)ImageSource.Designer)
       {
         <MudTh>
           @{
@@ -69,7 +69,7 @@
       }
     </MudTh>
     <MudTh>
-      @if (context.Asset.ProductType == (int)ProductType.POD)
+      @if (context.Asset.ImageSource == (int)ImageSource.Designer)
       {
         <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
           <ActivatorContent>

@@ -10,12 +10,11 @@
             <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
               <MudTextField @bind-Value="_asset.Name" T="string" Label="Name" Required="true" RequiredError="Name is required!" />
               <MudTextField @bind-Value="_asset.Description" T="string" Label="Description" Required="true" RequiredError="Description is required!"  />
-              <MudTextField @bind-Value="_asset.HsCode" T="string" Label="HS Code" Required="true" RequiredError="Password is required!"/>
               <MudField T="string" Label="Type"/>
               <div class="d-flex">
-                <MudRadioGroup T="string" @bind-Value="_asset.ProductType"  Required="true" RequiredError="Product type is required!">
-                  <MudRadio Value="@("POD")">Print on demand</MudRadio>
-                  <MudRadio Value="@("Static")">Pre Printed</MudRadio>
+                <MudRadioGroup T="string" @bind-Value="_asset.ImageSource" Required="true" RequiredError="Image Source is required!">
+                  <MudRadio Value="@("Designer")">Designer</MudRadio>
+                  <MudRadio Value="@("Supplied")">Artwork Supplied</MudRadio>
                 </MudRadioGroup>
               </div>
             </MudForm>
@@ -75,7 +74,6 @@
     </MudStep>
   </MudStepper>
 </MudPaper>
-<MudButton OnClick="Callback">Click me</MudButton>
 
 @code {
   bool success;

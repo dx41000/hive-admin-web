@@ -155,7 +155,7 @@
     var request = new GenerateImageRequest
     {
       ProductVariantId = long.Parse(ProductVariantId),
-      ProductType = (int)ProductType.POD
+      ProductType = (int)ImageSource.Designer
     };
 
     foreach (var testProductVariantViews in AppState.TestProductVariantViews)

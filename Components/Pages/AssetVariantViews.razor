@@ -61,7 +61,7 @@
       }
     </MudTh>
     <MudTd>
-      @if (context?.AssetVariant?.Asset?.ProductType == (int)ProductType.POD)
+      @if (context?.AssetVariant?.Asset?.ImageSource == (int)ImageSource.Designer)
       {
         <MudButton @onclick="() => OpenDialogAsync(context)" Variant="Variant.Filled" Color="Color.Primary">Design</MudButton>
       }
@@ -79,7 +79,7 @@
       }
     </MudTd>
     <MudTd>
-    @if (context?.AssetVariant?.Asset?.ProductType == (int)ProductType.POD)
+    @if (context?.AssetVariant?.Asset?.ImageSource == (int)ImageSource.Designer)
     {
       <MudButton @onclick="() => UpdateAllAssetVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
         Update all views

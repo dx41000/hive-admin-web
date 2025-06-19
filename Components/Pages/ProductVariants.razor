@@ -59,7 +59,7 @@
     @*   } *@
     @* </MudTd> *@
     <MudTd>
-      @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD)
+      @if (@context.AssetVariant.Asset.ImageSource == (int)ImageSource.Designer)
       {
         <MudButton @onclick="() => TestShopify(context)" Variant="Variant.Filled" Color="Color.Primary">Test Shopify</MudButton>
       }
@@ -167,7 +167,7 @@
     var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
     {
       ProductVariantId = (long)productVariant.Id,
-      ProductType = (int)productVariant.AssetVariant.Asset.ProductType,
+      ProductType = (int)productVariant.AssetVariant.Asset.ImageSource,
       GenerateImages = []
     });
     

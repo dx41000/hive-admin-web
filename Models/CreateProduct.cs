@@ -6,12 +6,12 @@ public class CreateProduct
     public string Name { get; set; }
     public string Description { get; set; }
     public double Price { get; set; }
-    public bool Customisable { get; set; }
     public string ImageUrl { get; set; }
     public List<long>? VariantIds { get; set; }
     public List<CreateProductView> CreateProductViews { get; set; }
     public DesignerOutput DesignerOutput { get; set; }
     public List<string> GenerateImageViews { get; set; }
+    public string ProductType { get; set; }
 }
 
 public class CreateProductView

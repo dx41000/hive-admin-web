@@ -17,8 +17,6 @@ public class AssetVariantView
     public int? BaseArtworkTop { get; set; }
     public int? BaseArtworkLeft { get; set; }
     public int? Order { get; set; }
-    public string DesignerJson { get; set; }
-    public string ThumbnailUrl { get; set; }
     public long? AssetVariantId { get; set; }
     public byte[]? PrintFile {get; set;}
     public AssetVariant? AssetVariant { get; set; }

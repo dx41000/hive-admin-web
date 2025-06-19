@@ -6,7 +6,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Newtonsoft.Json
 @using CreateAsset = hive_admin_web.Components.Dialog.CreateAsset
-@using CreateProduct = hive_admin_web.Components.Dialog.CreateProductDraft
+@using CreateProduct = hive_admin_web.Components.Dialog.CreateProduct
 @inject IDialogService DialogService
 @inject IAssetService AssetService;
 @attribute [Authorize]
@@ -35,13 +35,8 @@
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
-      <MudTableSortLabel SortLabel="HsCode" T="Asset">
-        HsCode
-      </MudTableSortLabel>
-    </MudTh>
-    <MudTh>
       <MudTableSortLabel SortLabel="ProductType" T="Asset">
-        Asset Type
+        Image Source
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
@@ -54,15 +49,14 @@
   <RowTemplate>
     <MudTd><a href="assetvariants/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="assetvariants/@context.Id">@context.Name</a></MudTd>
-    <MudTd>@context.HsCode</MudTd>
-    <MudTd>@(context.ProductType == 1 ? "Pod" : "All Over")</MudTd>
+    <MudTd>@(context.ImageSource == 1 ? "Designer" : "Artwork Supplied")</MudTd>
     <MudTd>
-      <MudButton @onclick="() => CreateAsset(context.Id)" Variant="Variant.Filled" Color="Color.Primary">
+      <MudButton @onclick="() => CreateAsset(context.Id??0, context.ImageSource)" Variant="Variant.Filled" Color="Color.Primary">
         Create Product
       </MudButton>
     </MudTd>
     <MudTd>
-      <MudButton @onclick="() => DeleteAsset(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
+      <MudButton @onclick="() => DeleteAsset(context.Id??0)" Variant="Variant.Filled" Color="Color.Primary">
         Delete
       </MudButton>
     </MudTd>
@@ -154,11 +148,12 @@
   }
 
 
-  private async Task CreateAsset(long? assetId)
+  private async Task CreateAsset(long assetId, int imageSource)
   {
     var parameters = new DialogParameters<CreateProduct>()
     {
-      { x => x.AssetId, assetId }
+      { x => x.AssetId, assetId },
+      { x => x.ImageSource, imageSource }
     };
 
     var options = new DialogOptions
@@ -173,7 +168,7 @@
     };
 
     //return DialogService.ShowAsync<CreateProduct>("Create Product", options);
-    var result = await (await DialogService.ShowAsync<CreateProduct>("Create Asset", parameters,  options)).Result;
+    var result = await (await DialogService.ShowAsync<CreateProduct>("Create Product", parameters,  options)).Result;
     var returnedValue = result.Data as string ?? string.Empty;
     
     await _table.ReloadServerData();

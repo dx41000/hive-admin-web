@@ -10,14 +10,11 @@ public class CreateAsset
     [JsonProperty("description")]
     public string Description { get; set; }
 
-    [JsonProperty("hsCode")]
-    public string HsCode { get; set; }
-
     [JsonProperty("release")]
     public bool Release { get; set; }
 
-    [JsonProperty("productType")]
-    public string ProductType { get; set; }
+    [JsonProperty("imageSource")]
+    public string ImageSource { get; set; }
 
     [JsonProperty("optionSetType1")]
     public string? OptionSetType1 { get; set; }

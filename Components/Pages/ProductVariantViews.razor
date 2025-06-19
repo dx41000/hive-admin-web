@@ -57,7 +57,7 @@
       <MudImage Src="@GetUrl((long)context.AssetVariantViewId)" Alt="Print File" Elevation="25" Class="rounded-lg"/>
     </MudTh>
     <MudTd>
-      @if (context.ProductType == (int)ProductType.POD)
+      @if (context.ProductType == (int)ImageSource.Designer)
       {
         <MudButton @onclick="() => OpenDialogAsync(context)" Variant="Variant.Filled" Color="Color.Primary">Design</MudButton>
       }
@@ -67,7 +67,7 @@
       }
     </MudTd>
     <MudTd>
-      @if (context.ProductType == (int)ProductType.POD)
+      @if (context.ProductType == (int)ImageSource.Designer)
       {
         <MudButton @onclick="() => UpdateAllProductVariantViews(context)" Variant="Variant.Filled" Color="Color.Primary">
           Update all views

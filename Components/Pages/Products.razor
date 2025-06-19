@@ -32,10 +32,10 @@
       </MudTableSortLabel>
     </MudTh>
     <MudTh>
-      HsCode
+      Image Source
     </MudTh>
     <MudTh>
-      Asset Type
+      Product Type
     </MudTh>
     <MudTh>
 
@@ -50,8 +50,8 @@
   <RowTemplate>
     <MudTd><a href="Productvariants/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="Productvariants/@context.Id">@context.Name</a></MudTd>
-    <MudTd>@context.Asset.HsCode</MudTd>
-    <MudTd>@(context.Asset.ProductType == 1 ? "Pod" : "All Over")</MudTd>
+    <MudTd>@(context.Asset.ImageSource == 1 ? "Designer" : "Supplied")</MudTd>
+    <MudTd>@(context.ProductType == 1 ? "Customisable" : "Non-Customisable")</MudTd>
     <MudTd>
       <MudButton @onclick="() => Publish(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">
         Publish

@@ -1,10 +1,17 @@
 @using hive_admin_web.Services.Interfaces
 @inject IProductService ProductService;
+@inject NavigationManager NavigationManager;
 <MudPaper Class="pa-4">
   <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
     <MudTextField @bind-Value="_product.Name" T="string" Label="Name" Required="true" RequiredError="Name is required!" />
     <MudTextField @bind-Value="_product.Description" T="string" Label="Description" Required="true" RequiredError="Description is required!"  />
-  </MudForm>
+    <div class="d-flex">
+      <MudRadioGroup T="string" @bind-Value="_product.ProductType"  Required="true" RequiredError="Product type is required!" ReadOnly="ImageSource == (int)Models.Enum.ImageSource.Supplied">
+        <MudRadio Value="@("Customisable")">Customisable</MudRadio>
+        <MudRadio Value="@("NonCustomisable")">Non-Customisable</MudRadio>
+      </MudRadioGroup>
+    </div>
+    </MudForm>
 </MudPaper>
 
 <MudButton OnClick="Create">Create</MudButton>
@@ -19,11 +26,19 @@
   private MudDialogInstance MudDialog { get; set; }
 
   [Parameter]
-  public long? AssetId { get; set; }
+  public long AssetId { get; set; }
+  
+  [Parameter]
+  public int ImageSource { get; set; }
 
   protected override async Task OnInitializedAsync()
   {
     _product = new Models.CreateProduct();
+    if (ImageSource == (int)Models.Enum.ImageSource.Supplied)
+    {
+      _product.ProductType = nameof(Models.Enum.ProductType.NonCustomisable);
+      StateHasChanged();
+    }
   }
 
   private async Task Create()
@@ -33,6 +48,7 @@
 
     await ProductService.Wizard(_product, "");
     MudDialog.Close(DialogResult.Ok("ProductDraftCreated"));
+    NavigationManager.NavigateTo("products");
   }
 
   private void Callback()
