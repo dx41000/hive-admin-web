@@ -7,7 +7,8 @@ public interface IProductVariantService
     Task<PagedResponse> GetAllProductVariantsAsync(long productId, int page, int count, string search = null,
         string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0");
 
-    Task<AssetVariant> GetProductVariantAsync(long productId, string apiVersion = "1.0");
+    Task<ApiResponse> GetProductVariantAsync(long productId, string apiVersion = "1.0");
 
     Task DeleteProductVariantAsync(long productVariantId, string apiVersion = null);
+    Task<ApiResponse> GetImageAsync(long productVariantId, string apiVersion = "1.0");
 }

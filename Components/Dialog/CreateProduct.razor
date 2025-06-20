@@ -43,7 +43,7 @@
 
   private async Task Create()
   {
-    _product.ProductId = AssetId;
+    _product.AssetId = AssetId;
     _product.ImageUrl = "SomeUrl";
 
     await ProductService.Wizard(_product, "");

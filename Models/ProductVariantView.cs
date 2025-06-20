@@ -5,25 +5,26 @@ namespace hive_admin_web.Models
         public long? Id { get; set; }
         public string? Name { get; set; }
         
-        public string? Artwork { get; set; }
-        public string? ArtworkThumb { get; set; }
         public long? WorkspaceId { get; set; }
         
         public string? DesignerJson { get; set; }
         
         public string? PrintOrder { get; set; }
         public long? ProductVariantId { get; set; }        
-        public long? AssetVariantViewId { get; set; }
         
+        public double? ScaleX { get; set; }
+        public double? ScaleY { get; set; }
+        public int? CanvasWidth { get; set; }
+        public int? CanvasHeight { get; set; }
+        public int? PrintBoxWidth { get; set; }
+        public int? PrintBoxHeight { get; set; }
+        public int? PrintBoxTop { get; set; }
+        public int? PrintBoxLeft { get; set; }
+        public int? OutputWidth { get; set; }
+        public int? OutputHeight { get; set; }
+        public int? BaseArtworkTop { get; set; }
+        public int? BaseArtworkLeft { get; set; }
         
-        public AssetVariantView? AssetVariantView { get; set; }
-
-        
-        
-        //Extra 
-        public long? ProductId { get; set; }
-        public long? AssetId { get; set; }
-        public int? ProductType { get; set; }
-
+        public ProductVariant ProductVariant { get; set; }
     }
 }

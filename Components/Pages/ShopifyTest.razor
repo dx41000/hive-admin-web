@@ -137,8 +137,8 @@
     var uri = new Uri(Navigation.Uri);
     currentUrl = "singleview.html?viewUrl=" + Uri.EscapeDataString($"{uri.Scheme}://{uri.Host}:{uri.Port}/api/views/{AppState.TestProductVariantViews[_currentView].Id}");
 
-    var height = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasHeight;
-    var width = AppState.TestProductVariantViews[_currentView].AssetVariantView.CanvasWidth;
+    var height = AppState.TestProductVariantViews[_currentView].CanvasHeight;
+    var width = AppState.TestProductVariantViews[_currentView].CanvasWidth;
 
     await JS.InvokeVoidAsync("resizeIframe", "myIframe", width, height); // Example dimensions
   }
@@ -154,8 +154,7 @@
     overlayVisible = true;
     var request = new GenerateImageRequest
     {
-      ProductVariantId = long.Parse(ProductVariantId),
-      ProductType = (int)ImageSource.Designer
+      ProductVariantId = long.Parse(ProductVariantId)
     };
 
     foreach (var testProductVariantViews in AppState.TestProductVariantViews)

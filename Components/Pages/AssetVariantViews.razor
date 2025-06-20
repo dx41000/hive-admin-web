@@ -65,18 +65,18 @@
       {
         <MudButton @onclick="() => OpenDialogAsync(context)" Variant="Variant.Filled" Color="Color.Primary">Design</MudButton>
       }
-      else
-      {
-        <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
-          <ActivatorContent>
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.CloudUpload">
-              Upload
-            </MudButton>
-          </ActivatorContent>
-        </MudFileUpload>
-      }
+      @* else *@
+      @* { *@
+      @*   <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }"> *@
+      @*     <ActivatorContent> *@
+      @*       <MudButton Variant="Variant.Filled" *@
+      @*                  Color="Color.Primary" *@
+      @*                  StartIcon="@Icons.Material.Filled.CloudUpload"> *@
+      @*         Upload *@
+      @*       </MudButton> *@
+      @*     </ActivatorContent> *@
+      @*   </MudFileUpload> *@
+      @* } *@
     </MudTd>
     <MudTd>
     @if (context?.AssetVariant?.Asset?.ImageSource == (int)ImageSource.Designer)

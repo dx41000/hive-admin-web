@@ -5,8 +5,6 @@
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @inject IJSRuntime JsRuntime
-@inject IProductariantViewService ProductariantViewService;
-@inject AppState AppState;
 <MudPaper>
   <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
     <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
@@ -283,15 +281,15 @@
       }
       else
       {
-        var printBoxHeight = ProductVariantView?.AssetVariantView?.PrintBoxHeight;
-        var printBoxTop = ProductVariantView?.AssetVariantView?.PrintBoxTop;
-        var printBoxLeft = ProductVariantView?.AssetVariantView?.PrintBoxLeft;
-        var printBoxWidth = ProductVariantView?.AssetVariantView?.PrintBoxWidth;
-        var baseArtworkTop = ProductVariantView?.AssetVariantView?.BaseArtworkTop;
-        var baseArtworkLeft = ProductVariantView?.AssetVariantView?.BaseArtworkLeft;
-        var outputWidth = ProductVariantView?.AssetVariantView?.OutputWidth;
-        var outputHeight = ProductVariantView?.AssetVariantView?.OutputHeight;
-        var canvasWidth = ProductVariantView?.AssetVariantView?.CanvasWidth;
+        var printBoxHeight = ProductVariantView?.PrintBoxHeight;
+        var printBoxTop = ProductVariantView?.PrintBoxTop;
+        var printBoxLeft = ProductVariantView?.PrintBoxLeft;
+        var printBoxWidth = ProductVariantView?.PrintBoxWidth;
+        var baseArtworkTop = ProductVariantView?.BaseArtworkTop;
+        var baseArtworkLeft = ProductVariantView?.BaseArtworkLeft;
+        var outputWidth = ProductVariantView?.OutputWidth;
+        var outputHeight = ProductVariantView?.OutputHeight;
+        var canvasWidth = ProductVariantView?.CanvasWidth;
         
         var aspect = Helper.ScaleRectangles(
           (int)outputWidth,
@@ -307,8 +305,8 @@
         designFile =
           designerTemplae.Replace("**product**",
             productTemplate
-              .Replace("**stageWidth**", ProductVariantView?.AssetVariantView?.CanvasWidth.ToString())
-              .Replace("**stageHeight**", ProductVariantView?.AssetVariantView?.CanvasHeight.ToString())
+              .Replace("**stageWidth**", ProductVariantView?.CanvasWidth.ToString())
+              .Replace("**stageHeight**", ProductVariantView?.CanvasHeight.ToString())
               .Replace("**printBoxHeight**", aspect.newHeightPrintBox.ToString())
               .Replace("**printBoxWidth**", aspect.newWidthPrintBox.ToString())
               .Replace("**printBoxTop**", aspect.newTopPrintBox.ToString())

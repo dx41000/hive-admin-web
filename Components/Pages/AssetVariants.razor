@@ -69,8 +69,6 @@
       }
     </MudTh>
     <MudTh>
-      @if (context.Asset.ImageSource == (int)ImageSource.Designer)
-      {
         <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await UploadFiles(file, context); }">
           <ActivatorContent>
             <MudButton Variant="Variant.Filled"
@@ -80,7 +78,7 @@
             </MudButton>
           </ActivatorContent>
         </MudFileUpload>
-      }
+      
     </MudTh>
     <MudTd>
       <MudButton @onclick="() => DeleteAssetVariant(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">

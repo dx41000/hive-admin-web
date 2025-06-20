@@ -2,7 +2,7 @@ namespace hive_admin_web.Models;
 
 public class CreateProduct
 {
-    public long? ProductId { get; set; }
+    public long? AssetId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public double Price { get; set; }

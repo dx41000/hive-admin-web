@@ -26,7 +26,7 @@ public class ProductVariantService(IHttpClientFactory httpClientFactory, AppStat
         return productVariantss;
     }
     
-    public async Task<AssetVariant> GetProductVariantAsync(long productId, string apiVersion = "1.0")
+    public async Task<ApiResponse> GetProductVariantAsync(long productId, string apiVersion = "1.0")
     {
         var storeId = appState.StoreId;
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"api/productvariant/{productId}");
@@ -38,8 +38,24 @@ public class ProductVariantService(IHttpClientFactory httpClientFactory, AppStat
         response.EnsureSuccessStatusCode();
 
         var content = await response.Content.ReadAsStringAsync();
-        var productVariant = JsonConvert.DeserializeObject<AssetVariant>(content);
+        var productVariant = JsonConvert.DeserializeObject<ApiResponse>(content);
         return productVariant;
+    }
+    
+        public async Task<ApiResponse> GetImageAsync(long productVariantId, string apiVersion = "1.0")
+    {
+        var storeId = appState.StoreId;
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"api/printready/GetImage/{productVariantId}");
+
+        if (!string.IsNullOrEmpty(apiVersion))
+            requestMessage.Headers.Add("api-version", apiVersion);
+
+        var response = await _httpClient.SendAsync(requestMessage);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var generateImageResponse = JsonConvert.DeserializeObject<ApiResponse>(content);
+        return generateImageResponse;
     }
     
     public async Task DeleteProductVariantAsync(long productVariantId, string apiVersion = null)

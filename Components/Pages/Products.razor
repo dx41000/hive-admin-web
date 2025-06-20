@@ -50,7 +50,7 @@
   <RowTemplate>
     <MudTd><a href="Productvariants/@context.Id">@context.Id</a></MudTd>
     <MudTd><a href="Productvariants/@context.Id">@context.Name</a></MudTd>
-    <MudTd>@(context.Asset.ImageSource == 1 ? "Designer" : "Supplied")</MudTd>
+    <MudTd>@(context.ImageSource == 1 ? "Designer" : "Supplied")</MudTd>
     <MudTd>@(context.ProductType == 1 ? "Customisable" : "Non-Customisable")</MudTd>
     <MudTd>
       <MudButton @onclick="() => Publish(context.Id ?? -1)" Variant="Variant.Filled" Color="Color.Primary">

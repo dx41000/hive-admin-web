@@ -11,8 +11,6 @@ public class AssetVariant
     public string Option3Type { get; set; }
     public string ExternalVariantId { get; set; }
     public string ExternalPrintProviderId { get; set; }
-    public double? Cost { get; set; }
-    public double? Price { get; set; }
     public byte[] BaseArtwork { get; set; }
     public string BaseArtworkThumb { get; set; }
     public List<AssetVariantView>? AssetVariantViews { get; set; }

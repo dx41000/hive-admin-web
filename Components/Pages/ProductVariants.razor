@@ -49,9 +49,9 @@
   </HeaderContent>
   <RowTemplate>
     <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.Id</a></MudTd>
-    <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.AssetVariant.Option1Type - @context.AssetVariant.Option1</a></MudTd>
-    <MudTd>@context.AssetVariant.Option2Type - @context.AssetVariant.Option2</MudTd>
-    <MudTd>@context.AssetVariant.Option3Type - @context.AssetVariant.Option3</MudTd>
+    <MudTd><a href="ProductVariantViews/@context.ProductId/@context.Id">@context.Option1Type - @context.Option1</a></MudTd>
+    <MudTd>@context.Option2Type - @context.Option2</MudTd>
+    <MudTd>@context.Option3Type - @context.Option3</MudTd>
     @* <MudTd> *@
     @*   @if (@context.AssetVariant.Asset.ProductType == (int)ProductType.POD) *@
     @*   { *@
@@ -59,9 +59,13 @@
     @*   } *@
     @* </MudTd> *@
     <MudTd>
-      @if (@context.AssetVariant.Asset.ImageSource == (int)ImageSource.Designer)
+      @if (@context.Product.ProductType == (int)ProductType.Customisable)
       {
         <MudButton @onclick="() => TestShopify(context)" Variant="Variant.Filled" Color="Color.Primary">Test Shopify</MudButton>
+      }      
+      else      
+      {
+        <MudButton @onclick="() => TestGetFile(context)" Variant="Variant.Filled" Color="Color.Primary">Test</MudButton>
       }
     </MudTd>
     <MudTd>
@@ -159,17 +163,12 @@
   }
   
   
-  private async Task TestPrintFile(ProductVariant productVariant)
+  private async Task TestGetFile(ProductVariant productVariant)
   {
     _isLoading = true;
     overlayVisible = true;
     
-    var response = await ProductariantViewService.GetPrintFile(new GenerateImageRequest
-    {
-      ProductVariantId = (long)productVariant.Id,
-      ProductType = (int)productVariant.AssetVariant.Asset.ImageSource,
-      GenerateImages = []
-    });
+    var response = await ProductVariantService.GetImageAsync((long)productVariant.Id);
     
     var json = response.Data.Payload.ToString();
     var generateImageResponse = JsonConvert.DeserializeObject<GenerateImageResponse>(json);

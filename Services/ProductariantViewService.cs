@@ -40,19 +40,37 @@ namespace hive_admin_web.Services
             }
         }
 
-        public async Task<PagedResponse> GetAllProductVariantViewsByIdAsync(long productVariantViewId,int page = 1, int count = 10, string search = null,
+        public async Task<PagedResponse> GetAllProductVariantViewsByIdAsync(long productVariantId,int page = 1, int count = 10, string search = null,
             string orderColumn = null, string orderDir = "asc", string apiVersion = "1.0")
         {
             SetDefaultHeaders(apiVersion);
 
             var storeId = appState.StoreId;
-            var url = $"api/productvariantview/all/{productVariantViewId}/{storeId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}";
+            var url = $"api/productvariantview/all/{productVariantId}/{storeId}?page={page}&count={count}&search={search}&orderColumn={orderColumn}&orderDir={orderDir}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<PagedResponse>(jsonResponse);
+            }
+            else
+            {
+                throw new Exception($"Error fetching product variant views: {response.StatusCode}");
+            }
+        }
+        
+        public async Task<IList<ProductVariantView>> GetAllViews(long productVariantId, string apiVersion = "1.0")
+        {
+            SetDefaultHeaders(apiVersion);
+
+            var storeId = appState.StoreId;
+            var url = $"api/productvariantview/hive/{productVariantId}/views";
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<IList<ProductVariantView>>(jsonResponse);
             }
             else
             {

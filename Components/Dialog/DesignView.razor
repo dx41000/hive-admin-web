@@ -1,5 +1,7 @@
 @using hive_admin_web.Components.Designer.ProductDesigner
 @using hive_admin_web.Models
+@using hive_admin_web.Models.PrintReady
+@using hive_admin_web.Services
 
 
 <MudDialog>
@@ -30,7 +32,9 @@
     await productDesignerRef.GetProduct();
     MudDialog.Close(DialogResult.Ok(ProductVariantView));
   }
-
+  
   private void Cancel() => MudDialog.Cancel();
+
+}
 
 }
